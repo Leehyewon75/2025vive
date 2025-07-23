@@ -2,10 +2,14 @@ import streamlit as st
 import time
 import random
 from datetime import date
+from streamlit_autorefresh import st_autorefresh  # ✅ 자동 새로고침
+
+# ✅ 자동 새로고침: 1초마다 새로고침
+st_autorefresh(interval=1000, limit=None, key="autorefresh")
 
 st.set_page_config(page_title="공부 앱 - 미루지 말자!", layout="centered")
 
-# ------------------- 세션 초기화 -------------------
+# ---------------- 세션 상태 초기화 ----------------
 def init_state():
     st.session_state.setdefault("focus_running", False)
     st.session_state.setdefault("focus_remaining", 25 * 60)
@@ -25,7 +29,7 @@ def init_state():
 
 init_state()
 
-# ------------------- 타이머 업데이트 -------------------
+# ---------------- 타이머 업데이트 ----------------
 def update_timer(timer_type):
     now = time.time()
     if timer_type == "focus" and st.session_state.focus_running:
@@ -37,7 +41,7 @@ def update_timer(timer_type):
         st.session_state.break_remaining = max(0, st.session_state.break_remaining - elapsed)
         st.session_state.break_last_update = now
 
-# ------------------- 1. 할 일 목록 -------------------
+# ---------------- 1. 오늘의 할 일 ----------------
 st.header("✅ 오늘의 할 일")
 
 new_task = st.text_input("할 일을 입력하세요", value=st.session_state.new_task_input_val)
@@ -51,7 +55,15 @@ for i, item in enumerate(st.session_state.checklist):
     checked = st.checkbox(item["text"], value=item["checked"], key=key)
     st.session_state.checklist[i]["checked"] = checked
 
-# ------------------- 3. 동기부여 -------------------
+# ---------------- 2. 목표 입력 ----------------
+st.markdown("---")
+st.header("🎯 오늘의 목표 집중 시간")
+
+goal = st.number_input("오늘의 목표 집중 시간 (분)", min_value=0, max_value=1440, value=st.session_state.goal_minutes)
+st.session_state.goal_minutes = goal
+st.info(f"오늘의 목표: **{goal}분** 집중")
+
+# ---------------- 3. 동기부여 ----------------
 st.markdown("---")
 st.header("💬 동기부여 한 마디")
 
@@ -75,7 +87,7 @@ if st.button("🎯 동기부여 듣기"):
 if st.session_state.motivation:
     st.success(f"🌟 {st.session_state.motivation}")
 
-# ------------------- 4. 집중 타이머 -------------------
+# ---------------- 4. 집중 타이머 ----------------
 st.markdown("---")
 st.header("⏱ 25분 집중 타이머")
 
@@ -99,7 +111,7 @@ with focus_col3:
 if st.session_state.focus_remaining == 0:
     st.success("🎉 집중 시간 종료! 휴식 시간으로 넘어가세요.")
 
-# ------------------- 5. 휴식 타이머 -------------------
+# ---------------- 5. 휴식 타이머 ----------------
 st.markdown("---")
 st.header("🛌 5분 휴식 타이머")
 
@@ -123,7 +135,7 @@ with break_col3:
 if st.session_state.break_remaining == 0:
     st.info("☕ 휴식 종료! 다시 집중해볼까요?")
 
-# ------------------- 6. 집중/휴식 시간 수동 기록 -------------------
+# ---------------- 6. 집중/휴식 수동 기록 ----------------
 st.markdown("---")
 st.header("🧠 수동 집중 / ☕ 휴식 시간 기록")
 
@@ -139,7 +151,7 @@ with st.form("time_log_form"):
             st.session_state.break_log.append(rest)
         st.success("✅ 시간이 기록되었습니다!")
 
-# ------------------- 7. 오늘의 일기 -------------------
+# ---------------- 7. 오늘의 일기 ----------------
 st.markdown("---")
 st.header("📓 오늘의 일기")
 
@@ -154,7 +166,7 @@ if today in st.session_state.diary:
     st.markdown("📖 **오늘 쓴 일기 미리 보기:**")
     st.info(st.session_state.diary[today])
 
-# ------------------- 8. 통계 -------------------
+# ---------------- 8. 통계 ----------------
 st.markdown("---")
 st.header("📊 집중/휴식 누적 통계")
 
