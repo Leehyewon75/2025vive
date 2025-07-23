@@ -354,3 +354,8 @@ if remaining == 0 and st.session_state.timer_running:
 # ------------------------
 if st.session_state.timer_running:
     st.experimental_rerun()
+# 기존 코드 (오류 발생 가능)
+# checked = st.checkbox(item["text"], value=item["checked"], key=f"task_{i}")
+
+# 수정 코드 (텍스트와 인덱스를 조합하여 고유 키 생성)
+checked = st.checkbox(item["text"], value=item["checked"], key=f"task_{i}_{item['text']}")
