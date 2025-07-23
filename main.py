@@ -2,44 +2,41 @@ import streamlit as st
 import time
 import random
 import hashlib
-import datetime  # 수정된 부분
+import datetime
 
 st.set_page_config(page_title="미루지 말자!", layout="centered")
 
-# 초기 세션 상태
-if "checklist" not in st.session_state:
-    st.session_state.checklist = []
+# ----------------------------
+# ✅ 세션 상태 초기화
+# ----------------------------
+def init_session_state():
+    defaults = {
+        "checklist": [],
+        "reward_categories": {},
+        "selected_reward": None,
+        "diary_entries": {},
+        "timer_running": False,
+        "start_time": None,
+        "paused": False,
+        "elapsed": 0,
+        "running": False,
+    }
+    for key, val in defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = val
 
-if "reward_categories" not in st.session_state:
-    st.session_state.reward_categories = {}
+    # 안전성 강화
+    if not isinstance(st.session_state.diary_entries, dict):
+        st.session_state.diary_entries = {}
 
-if "selected_reward" not in st.session_state:
-    st.session_state.selected_reward = None
+init_session_state()
 
-if "diary_entries" not in st.session_state:
-    st.session_state.diary_entries = {}
-
-if "timer_running" not in st.session_state:
-    st.session_state.timer_running = False
-
-if "start_time" not in st.session_state:
-    st.session_state.start_time = None
-
-if "paused" not in st.session_state:
-    st.session_state.paused = False
-
-if "elapsed" not in st.session_state:
-    st.session_state.elapsed = 0
-
-if "running" not in st.session_state:
-    st.session_state.running = False
-
-# --------------------------------------------------
-# 📋 체크리스트
-# --------------------------------------------------
+# ----------------------------
+# ✅ 체크리스트
+# ----------------------------
 st.title("✅ 체크리스트 + ⏱ 타이머 + 🎁 보상 + 📝 일기")
-
 st.header("📋 오늘의 할 일")
+
 task_input = st.text_input("할 일 입력", key="input_task")
 if st.button("➕ 추가"):
     if task_input.strip():
@@ -64,9 +61,9 @@ if total > 0:
 else:
     st.info("할 일을 입력해보세요!")
 
-# --------------------------------------------------
-# 🎁 보상 등록 + 랜덤 뽑기
-# --------------------------------------------------
+# ----------------------------
+# ✅ 보상 등록 + 랜덤 뽑기
+# ----------------------------
 st.header("🎁 카테고리별 보상 등록")
 
 with st.form("reward_form_section"):
@@ -74,12 +71,10 @@ with st.form("reward_form_section"):
     reward = st.text_input("보상 내용", placeholder="예: 치킨 먹기")
     submit = st.form_submit_button("추가")
     if submit and category.strip() and reward.strip():
-        if category not in st.session_state.reward_categories:
-            st.session_state.reward_categories[category] = []
-        st.session_state.reward_categories[category].append(reward)
+        st.session_state.reward_categories.setdefault(category, []).append(reward)
         st.success("보상이 추가되었습니다!")
 
-# 보상 보기
+# 등록된 보상 출력
 if st.session_state.reward_categories:
     for cat, rewards in st.session_state.reward_categories.items():
         st.markdown(f"**🗂️ {cat}**")
@@ -104,9 +99,9 @@ else:
 if st.session_state.selected_reward:
     st.success(f"🎉 오늘의 보상: **{st.session_state.selected_reward}**")
 
-# --------------------------------------------------
-# ⏱ 타이머
-# --------------------------------------------------
+# ----------------------------
+# ✅ 25분 타이머
+# ----------------------------
 st.header("⏱ 25분 집중 타이머")
 
 if st.button("▶️ 타이머 시작"):
@@ -116,7 +111,6 @@ if st.button("▶️ 타이머 시작"):
 if st.button("⏹️ 타이머 중단"):
     st.session_state.running = False
 
-# 25분 타이머 설정
 total_seconds = 25 * 60
 
 if st.session_state.running:
@@ -130,27 +124,30 @@ if st.session_state.running:
         mins, secs = divmod(remaining, 60)
         st.subheader(f"{mins:02d}:{secs:02d} 남음")
         st.progress((total_seconds - remaining) / total_seconds)
-
-        # 1초마다 자동 새로고침
         st.rerun()
 else:
     st.write("버튼을 눌러 타이머를 시작하세요.")
 
-# --------------------------------------------------
-# 📝 일기 기능
-# --------------------------------------------------
+# ----------------------------
+# ✅ 일기 기능
+# ----------------------------
 st.header("📝 오늘의 일기")
 
-today = datetime.date.today().isoformat()  # 수정된 부분
+today = datetime.date.today().isoformat()
 default_text = st.session_state.diary_entries.get(today, "")
 diary = st.text_area("오늘 하루 어땠나요?", value=default_text, height=200)
 
 if st.button("💾 일기 저장"):
-    st.session_state.diary_entries[today] = diary
-    st.success("일기가 저장되었습니다.")
+    if isinstance(st.session_state.diary_entries, dict):
+        st.session_state.diary_entries[today] = diary
+        st.success("일기가 저장되었습니다.")
+    else:
+        st.error("❗️일기 저장에 문제가 발생했습니다.")
 
+# 이전 일기 보기
 if st.session_state.diary_entries:
     st.subheader("📚 이전 일기 보기")
     dates = sorted(st.session_state.diary_entries.keys(), reverse=True)
     selected = st.selectbox("날짜 선택", dates)
-    st.text_area("📖 저장된 일기", value=st.session_state.diary_entries[selected], height=200, disabled=True)
+    saved = st.session_state.diary_entries.get(selected, "")
+    st.text_area("📖 저장된 일기", value=saved, height=200, disabled=True)
