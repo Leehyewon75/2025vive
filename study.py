@@ -174,5 +174,11 @@ break_min = st.session_state.break_total // 60
 
 st.write(f"🧠 총 집중 시간: **{focus_min}분**")
 st.write(f"☕ 총 휴식 시간: **{break_min}분**")
+placeholder = st.empty()
+while 조건:
+    with placeholder.container():
+        # 남은 시간 출력
+    time.sleep(1)
+    st.rerun()  # 또는 상태를 조정하고 빠져나와서 갱신
 
 st.bar_chart({"시간(분)": [focus_min, break_min]})
