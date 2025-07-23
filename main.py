@@ -65,38 +65,41 @@ else:
 # --------------------------------------------------
 # ⏱ 타이머 (25분, 일시정지/재시작)
 # --------------------------------------------------
+import streamlit as st
 import time
-from datetime import timedelta, datetime
 
 st.set_page_config(page_title="25분 타이머", layout="centered")
 st.title("🍅 뽀모도로 타이머")
 
-# 초기 상태 설정
+# 초기화
 if "start_time" not in st.session_state:
     st.session_state.start_time = None
 if "running" not in st.session_state:
     st.session_state.running = False
 
-TIMER_DURATION_SECONDS = 25 * 60  # 1500초
+TIMER_DURATION = 25 * 60  # 초 단위
 
-# 타이머 시작
+# 시작
 if st.button("▶️ 시작하기", type="primary"):
     st.session_state.start_time = time.time()
     st.session_state.running = True
 
-# 타이머 중지
+# 중지
 if st.session_state.running and st.button("⏹️ 중지하기"):
     st.session_state.running = False
     st.session_state.start_time = None
 
-# 타이머 실행 중일 때
-if st.session_state.running and st.session_state.start_time:
+# 타이머 표시
+if st.session_state.running and st.session_state.start_time is not None:
     elapsed = int(time.time() - st.session_state.start_time)
-    remaining = TIMER_DURATION_SECONDS - elapsed
+    remaining = TIMER_DURATION - elapsed
 
     if remaining > 0:
         mins, secs = divmod(remaining, 60)
         st.subheader(f"⏳ 남은 시간: {mins:02d}:{secs:02d}")
+
+        # rerun 대신 Streamlit 내부 대기 유도
+        st.markdown("⌛ 타이머 진행 중...")
         time.sleep(1)
         st.experimental_rerun()
     else:
