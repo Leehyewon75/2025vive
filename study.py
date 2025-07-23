@@ -74,7 +74,7 @@ if st.session_state.motivation:
 
 # ------------------- 4. 집중/휴식 시간 기록 -------------------
 st.markdown("---")
-st.header("📖 집중 / ☕ 휴식 시간 기록")
+st.header("📖 집중 / 🛌 휴식 시간 기록")
 
 with st.form("time_log_form"):
     focus = st.number_input("오늘 추가한 집중 시간 (분)", min_value=0, step=1)
