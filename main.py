@@ -65,50 +65,47 @@ else:
 # --------------------------------------------------
 # ⏱ 타이머 (25분, 일시정지/재시작)
 # --------------------------------------------------
-st.header("⏱ 집중 타이머 (25분)")
+import time
+from datetime import timedelta, datetime
 
-TIMER_DURATION = 25 * 60
-col1, col2, col3 = st.columns(3)
+st.set_page_config(page_title="25분 뽀모도로 타이머", layout="centered")
 
-with col1:
-    if st.button("▶️ 시작", disabled=st.session_state.timer_running):
-        st.session_state.start_time = time.time() - st.session_state.elapsed
-        st.session_state.timer_running = True
-        st.session_state.paused = False
+st.title("🍅 뽀모도로 타이머")
 
-with col2:
-    if st.button("⏸ 일시정지", disabled=not st.session_state.timer_running or st.session_state.paused):
-        st.session_state.paused = True
-        st.session_state.elapsed = time.time() - st.session_state.start_time
-        st.session_state.timer_running = False
+# 초기 상태 설정
+if "start_time" not in st.session_state:
+    st.session_state.start_time = None
+if "running" not in st.session_state:
+    st.session_state.running = False
 
-with col3:
-    if st.button("🔁 리셋"):
-        st.session_state.timer_running = False
-        st.session_state.paused = False
+TIMER_DURATION = timedelta(minutes=25)
+
+# 시작 버튼 클릭 시
+if st.button("▶️ 시작하기", type="primary"):
+    st.session_state.start_time = datetime.now()
+    st.session_state.running = True
+
+# 중지 버튼
+if st.session_state.running and st.button("⏹️ 중지하기"):
+    st.session_state.running = False
+    st.session_state.start_time = None
+
+# 타이머 실행
+if st.session_state.running and st.session_state.start_time:
+    elapsed = datetime.now() - st.session_state.start_time
+    remaining = TIMER_DURATION - elapsed
+
+    if remaining.total_seconds() > 0:
+        mins, secs = divmod(int(remaining.total_seconds()), 60)
+        st.subheader(f"⏳ 남은 시간: {mins:02d}:{secs:02d}")
+        time.sleep(1)
+        st.experimental_rerun()
+    else:
+        st.session_state.running = False
         st.session_state.start_time = None
-        st.session_state.elapsed = 0
-
-# 타이머 시간 계산
-if st.session_state.timer_running and not st.session_state.paused:
-    elapsed = time.time() - st.session_state.start_time
+        st.success("✅ 25분 완료! 잠시 휴식하세요.")
 else:
-    elapsed = st.session_state.elapsed
-
-remaining = max(0, TIMER_DURATION - int(elapsed))
-minutes, seconds = divmod(remaining, 60)
-st.markdown(f"### ⏳ 남은 시간: **{minutes:02d}:{seconds:02d}**")
-
-# 타이머 완료
-if remaining == 0 and st.session_state.timer_running:
-    st.session_state.timer_running = False
-    st.session_state.paused = False
-    st.success("🎉 집중 완료! 잘했어요!")
-    st.balloons()
-
-if st.session_state.timer_running:
-    st.experimental_rerun()
-
+    st.subheader("⏳ 대기 중...")
 
 # --------------------------------------------------
 # 🎁 보상 등록 + 랜덤 뽑기
