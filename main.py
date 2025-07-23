@@ -68,11 +68,10 @@ else:
 import time
 from datetime import timedelta, datetime
 
-st.set_page_config(page_title="25분 뽀모도로 타이머", layout="centered")
-
+st.set_page_config(page_title="25분 타이머", layout="centered")
 st.title("🍅 뽀모도로 타이머")
 
-# 초기 상태 설정
+# 초기 세션 상태 설정
 if "start_time" not in st.session_state:
     st.session_state.start_time = None
 if "running" not in st.session_state:
@@ -95,15 +94,16 @@ if st.session_state.running and st.session_state.start_time:
     elapsed = datetime.now() - st.session_state.start_time
     remaining = TIMER_DURATION - elapsed
 
+    # 남은 시간이 음수가 되지 않도록 제한
     if remaining.total_seconds() > 0:
-        mins, secs = divmod(int(remaining.total_seconds()), 60)
+        mins, secs = divmod(int(remaining.total_seconds() + 1), 60)  # ⬅️ +1초 보정
         st.subheader(f"⏳ 남은 시간: {mins:02d}:{secs:02d}")
         time.sleep(1)
         st.experimental_rerun()
     else:
         st.session_state.running = False
         st.session_state.start_time = None
-        st.success("✅ 25분 완료! 잠시 휴식하세요.")
+        st.success("✅ 25분 완료! 휴식하세요.")
 else:
     st.subheader("⏳ 대기 중...")
 
