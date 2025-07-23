@@ -40,7 +40,6 @@ def init_state():
 
 import streamlit as st
 import time
-from streamlit_autorefresh import st_autorefresh
 
 # 🔁 자동 새로고침: 1초마다
 st_autorefresh(interval=1000, key="auto_refresh")
