@@ -3,8 +3,10 @@ import time
 import random
 from datetime import date
 
+# 기본 설정
 st.set_page_config(page_title="공부 앱 - 미루지 말자!", layout="centered")
 
+# 동기부여 문구
 quotes = [
     "지금 하는 작은 노력이 내일의 큰 결과를 만든다.",
     "포기하지 마! 너는 할 수 있어 💪",
@@ -14,30 +16,31 @@ quotes = [
 ]
 st.markdown(f"### 🌟 {random.choice(quotes)}")
 
-# ------------------- 상태 초기화 -------------------
-if "focus_running" not in st.session_state:
-    st.session_state.focus_running = False
-    st.session_state.focus_paused = False
-    st.session_state.focus_start = None
-    st.session_state.focus_remaining = 25 * 60
-    st.session_state.focus_total = 0
-    st.session_state.focus_logged = False
+# 세션 상태 초기화
+def init_state():
+    keys_defaults = {
+        "focus_running": False,
+        "focus_paused": False,
+        "focus_start": None,
+        "focus_remaining": 25 * 60,
+        "focus_total": 0,
+        "focus_logged": False,
+        "break_running": False,
+        "break_paused": False,
+        "break_start": None,
+        "break_remaining": 5 * 60,
+        "break_total": 0,
+        "break_logged": False,
+        "checklist": [],
+        "diary": {},
+    }
+    for k, v in keys_defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
 
-if "break_running" not in st.session_state:
-    st.session_state.break_running = False
-    st.session_state.break_paused = False
-    st.session_state.break_start = None
-    st.session_state.break_remaining = 5 * 60
-    st.session_state.break_total = 0
-    st.session_state.break_logged = False
+init_state()
 
-if "checklist" not in st.session_state:
-    st.session_state.checklist = []
-
-if "diary" not in st.session_state:
-    st.session_state.diary = {}
-
-# ------------------- 타이머 함수 -------------------
+# ---------------- 집중 타이머 ----------------
 def start_focus():
     st.session_state.focus_start = time.time()
     st.session_state.focus_running = True
@@ -53,6 +56,33 @@ def reset_focus():
     st.session_state.focus_remaining = 25 * 60
     st.session_state.focus_logged = False
 
+if st.session_state.focus_running:
+    elapsed = int(time.time() - st.session_state.focus_start)
+    st.session_state.focus_remaining = max(0, st.session_state.focus_remaining - elapsed)
+    st.session_state.focus_start = time.time()
+    if st.session_state.focus_remaining == 0 and not st.session_state.focus_logged:
+        st.session_state.focus_total += 25 * 60
+        st.session_state.focus_logged = True
+
+st.markdown("---")
+st.header("⏱️ 25분 집중 타이머")
+c1, c2, c3 = st.columns(3)
+with c1:
+    if st.button("▶️ 집중 시작"):
+        start_focus()
+with c2:
+    if st.button("⏸️ 일시정지"):
+        pause_focus()
+with c3:
+    if st.button("🔁 초기화"):
+        reset_focus()
+
+fmin, fsec = divmod(st.session_state.focus_remaining, 60)
+st.subheader(f"🕒 남은 집중 시간: {fmin:02d}:{fsec:02d}")
+if st.session_state.focus_remaining == 0:
+    st.success("🎉 집중 시간 종료! 이제 휴식하세요.")
+
+# ---------------- 휴식 타이머 ----------------
 def start_break():
     st.session_state.break_start = time.time()
     st.session_state.break_running = True
@@ -68,69 +98,33 @@ def reset_break():
     st.session_state.break_remaining = 5 * 60
     st.session_state.break_logged = False
 
-# ------------------- 집중 타이머 -------------------
-st.markdown("---")
-st.header("⏱️ 25분 집중 타이머")
-
-col1, col2, col3 = st.columns(3)
-with col1:
-    if st.button("▶️ 집중 시작"):
-        start_focus()
-with col2:
-    if st.button("⏸️ 집중 일시정지"):
-        pause_focus()
-with col3:
-    if st.button("🔁 집중 초기화"):
-        reset_focus()
-
-# 타이머 계산
-if st.session_state.focus_running:
-    elapsed = int(time.time() - st.session_state.focus_start)
-    st.session_state.focus_remaining = max(0, st.session_state.focus_remaining - elapsed)
-    st.session_state.focus_start = time.time()  # 기준 시점 재설정
-
-    if st.session_state.focus_remaining == 0 and not st.session_state.focus_logged:
-        st.session_state.focus_total += 25 * 60
-        st.session_state.focus_logged = True
-
-mins, secs = divmod(st.session_state.focus_remaining, 60)
-st.subheader(f"🕒 남은 집중 시간: {mins:02d}:{secs:02d}")
-
-if st.session_state.focus_remaining == 0:
-    st.success("🎉 집중 종료! 이제 휴식하세요.")
-
-# ------------------- 휴식 타이머 -------------------
-st.markdown("---")
-st.header("🛌 5분 휴식 타이머")
-
-col4, col5, col6 = st.columns(3)
-with col4:
-    if st.button("▶️ 휴식 시작"):
-        start_break()
-with col5:
-    if st.button("⏸️ 휴식 일시정지"):
-        pause_break()
-with col6:
-    if st.button("🔁 휴식 초기화"):
-        reset_break()
-
-# 휴식 계산
 if st.session_state.break_running:
     elapsed = int(time.time() - st.session_state.break_start)
     st.session_state.break_remaining = max(0, st.session_state.break_remaining - elapsed)
     st.session_state.break_start = time.time()
-
     if st.session_state.break_remaining == 0 and not st.session_state.break_logged:
         st.session_state.break_total += 5 * 60
         st.session_state.break_logged = True
 
-b_mins, b_secs = divmod(st.session_state.break_remaining, 60)
-st.subheader(f"🕒 남은 휴식 시간: {b_mins:02d}:{b_secs:02d}")
+st.markdown("---")
+st.header("🛌 5분 휴식 타이머")
+c4, c5, c6 = st.columns(3)
+with c4:
+    if st.button("▶️ 휴식 시작"):
+        start_break()
+with c5:
+    if st.button("⏸️ 일시정지", key="break_pause"):
+        pause_break()
+with c6:
+    if st.button("🔁 초기화", key="break_reset"):
+        reset_break()
 
+bmin, bsec = divmod(st.session_state.break_remaining, 60)
+st.subheader(f"🕒 남은 휴식 시간: {bmin:02d}:{bsec:02d}")
 if st.session_state.break_remaining == 0:
     st.info("☕ 휴식 끝! 다시 집중해봐요.")
 
-# ------------------- 할 일 -------------------
+# ---------------- To-Do 리스트 ----------------
 st.markdown("---")
 st.header("✅ 오늘의 할 일")
 
@@ -144,7 +138,7 @@ for i, task in enumerate(st.session_state.checklist):
     checked = st.checkbox(task["text"], value=task["checked"], key=f"task_{i}")
     st.session_state.checklist[i]["checked"] = checked
 
-# ------------------- 일기 -------------------
+# ---------------- 일기 ----------------
 st.markdown("---")
 st.header("📓 오늘의 일기")
 
@@ -158,7 +152,7 @@ if st.session_state.diary.get(today):
     st.markdown("📖 **오늘 쓴 일기 미리 보기:**")
     st.info(st.session_state.diary[today])
 
-# ------------------- 통계 -------------------
+# ---------------- 통계 ----------------
 st.markdown("---")
 st.header("📊 집중/휴식 누적 통계")
 
