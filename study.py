@@ -72,41 +72,22 @@ if st.button("🎯 동기부여 듣기"):
 if st.session_state.motivation:
     st.success(f"🌟 {st.session_state.motivation}")
 
-# ------------------- 세션 상태 초기화 -------------------
-if "focus_log" not in st.session_state:
-    st.session_state.focus_log = []  # 리스트에 dict로 저장됨
-
-# ------------------- 집중/휴식 시간 기록 입력 -------------------
+# ------------------- 4. 집중/휴식 시간 기록 -------------------
 st.markdown("---")
 st.header("📖 집중 / 🛌 휴식 시간 기록")
 
 with st.form("time_log_form"):
-    log_type = st.selectbox("기록 유형", ["focus", "break"])
-
-    col1, col2 = st.columns(2)
-    with col1:
-        start_time = st.time_input("시작 시간", step=timedelta(minutes=1))
-    with col2:
-        end_time = st.time_input("종료 시간", step=timedelta(minutes=1))
-
+    focus = st.number_input("오늘 추가한 집중 시간 (분)", min_value=0, step=1)
+    rest = st.number_input("오늘 추가한 휴식 시간 (분)", min_value=0, step=1)
     submitted = st.form_submit_button("기록하기")
 
     if submitted:
-        today = date.today()
-        start_dt = datetime.combine(today, start_time)
-        end_dt = datetime.combine(today, end_time)
+        if focus > 0:
+            st.session_state.focus_log.append(focus)
+        if rest > 0:
+            st.session_state.break_log.append(rest)
+        st.success("⏱ 시간이 기록되었습니다!")
 
-        if start_dt >= end_dt:
-            st.warning("⚠️ 종료 시간은 시작 시간보다 늦어야 합니다.")
-        else:
-            duration = (end_dt - start_dt).total_seconds()
-            st.session_state.focus_log.append({
-                "type": log_type,
-                "start": start_dt.isoformat(),
-                "end": end_dt.isoformat(),
-                "duration": duration
-            })
-            st.success(f"✅ {log_type.upper()} 시간이 기록되었습니다.")
 # ------------------- 5. 오늘의 일기 -------------------
 st.markdown("---")
 st.header("📓 오늘의 일기")
@@ -174,4 +155,3 @@ with st.expander("⏱️ 집중/휴식 기록 보기"):
 
         except Exception as e:
             st.error("기록을 불러오는 중 문제가 발생했습니다.")
-            st.exception(e)
