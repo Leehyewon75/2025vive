@@ -41,46 +41,50 @@ def init_state():
 init_state()
 
 # ---------------- 집중 타이머 ----------------
-def start_focus():
-    st.session_state.focus_start = time.time()
-    st.session_state.focus_running = True
-    st.session_state.focus_paused = False
+st.markdown("---")
+st.header("⏱️ 25분 집중 타이머")
 
-def pause_focus():
-    st.session_state.focus_running = False
-    st.session_state.focus_paused = True
+col1, col2, col3 = st.columns(3)
+with col1:
+    if st.button("▶️ 집중 시작"):
+        st.session_state.focus_start = time.time()
+        st.session_state.focus_running = True
+        st.session_state.focus_paused = False
+with col2:
+    if st.button("⏸️ 일시정지"):
+        st.session_state.focus_running = False
+        st.session_state.focus_paused = True
+with col3:
+    if st.button("🔁 초기화"):
+        st.session_state.focus_running = False
+        st.session_state.focus_paused = False
+        st.session_state.focus_remaining = 25 * 60
+        st.session_state.focus_logged = False
 
-def reset_focus():
-    st.session_state.focus_running = False
-    st.session_state.focus_paused = False
-    st.session_state.focus_remaining = 25 * 60
-    st.session_state.focus_logged = False
+# ---------------- 실시간 타이머 업데이트 ----------------
+focus_timer_placeholder = st.empty()
 
 if st.session_state.focus_running:
     elapsed = int(time.time() - st.session_state.focus_start)
     st.session_state.focus_remaining = max(0, st.session_state.focus_remaining - elapsed)
-    st.session_state.focus_start = time.time()
+    st.session_state.focus_start = time.time()  # 다음 타임 기준점 업데이트
+
+    # 시간 갱신
     if st.session_state.focus_remaining == 0 and not st.session_state.focus_logged:
         st.session_state.focus_total += 25 * 60
         st.session_state.focus_logged = True
 
-st.markdown("---")
-st.header("⏱️ 25분 집중 타이머")
-c1, c2, c3 = st.columns(3)
-with c1:
-    if st.button("▶️ 집중 시작"):
-        start_focus()
-with c2:
-    if st.button("⏸️ 일시정지"):
-        pause_focus()
-with c3:
-    if st.button("🔁 초기화"):
-        reset_focus()
+    # 시간 표시
+    mins, secs = divmod(st.session_state.focus_remaining, 60)
+    focus_timer_placeholder.subheader(f"🕒 남은 집중 시간: {mins:02d}:{secs:02d}")
 
-fmin, fsec = divmod(st.session_state.focus_remaining, 60)
-st.subheader(f"🕒 남은 집중 시간: {fmin:02d}:{fsec:02d}")
-if st.session_state.focus_remaining == 0:
-    st.success("🎉 집중 시간 종료! 이제 휴식하세요.")
+    # 실시간처럼 1초 대기 후 갱신
+    time.sleep(1)
+    st.experimental_rerun()
+else:
+    # 일시정지 또는 초기 상태일 때도 시간 보여줌
+    mins, secs = divmod(st.session_state.focus_remaining, 60)
+    st.subheader(f"🕒 남은 집중 시간: {mins:02d}:{secs:02d}")
 
 # ---------------- 휴식 타이머 ----------------
 def start_break():
@@ -174,12 +178,3 @@ break_min = st.session_state.break_total // 60
 
 st.write(f"🧠 총 집중 시간: **{focus_min}분**")
 st.write(f"☕ 총 휴식 시간: **{break_min}분**")
-
-placeholder = st.empty()
-while 조건:
-    with placeholder.container():
-        # 남은 시간 출력
-    time.sleep(1)
-    st.rerun()  # 또는 상태를 조정하고 빠져나와서 갱신
-
-st.bar_chart({"시간(분)": [focus_min, break_min]})
