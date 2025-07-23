@@ -81,9 +81,9 @@ with st.form("time_log_form"):
     
     col1, col2 = st.columns(2)
     with col1:
-        start_time = st.time_input("시작 시간")
+       start_time = st.time_input("시작 시간", step=timedelta(minutes=1))
     with col2:
-        end_time = st.time_input("종료 시간")
+       end_time = st.time_input("종료 시간", step=timedelta(minutes=1))
         
     submitted = st.form_submit_button("기록하기")
 
