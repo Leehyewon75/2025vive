@@ -77,16 +77,32 @@ st.markdown("---")
 st.header("📖 집중 / 🛌 휴식 시간 기록")
 
 with st.form("time_log_form"):
-    focus = st.number_input("오늘 추가한 집중 시간 (분)", min_value=0, step=1)
-    rest = st.number_input("오늘 추가한 휴식 시간 (분)", min_value=0, step=1)
+    log_type = st.selectbox("기록 유형", ["focus", "break"])
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        start_time = st.time_input("시작 시간")
+    with col2:
+        end_time = st.time_input("종료 시간")
+        
     submitted = st.form_submit_button("기록하기")
 
     if submitted:
-        if focus > 0:
-            st.session_state.focus_log.append(focus)
-        if rest > 0:
-            st.session_state.break_log.append(rest)
-        st.success("⏱ 시간이 기록되었습니다!")
+        today = date.today()
+        start_dt = datetime.combine(today, start_time)
+        end_dt = datetime.combine(today, end_time)
+
+        if start_dt >= end_dt:
+            st.warning("⚠️ 종료 시간은 시작 시간보다 늦어야 합니다.")
+        else:
+            duration = (end_dt - start_dt).total_seconds()
+            st.session_state.focus_log.append({
+                "type": log_type,
+                "start": start_dt.isoformat(),
+                "end": end_dt.isoformat(),
+                "duration": duration
+            })
+            st.success(f"✅ {log_type.upper()} 시간이 기록되었습니다.")
 
 # ------------------- 5. 오늘의 일기 -------------------
 st.markdown("---")
