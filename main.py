@@ -31,6 +31,9 @@ if "paused" not in st.session_state:
 if "elapsed" not in st.session_state:
     st.session_state.elapsed = 0
 
+if "running" not in st.session_state:
+    st.session_state.running = False
+
 
 # --------------------------------------------------
 # 📋 체크리스트
@@ -61,10 +64,6 @@ if total > 0:
     st.progress(completed / total)
 else:
     st.info("할 일을 입력해보세요!")
-
-# --------------------------------------------------
-
-
 
 # --------------------------------------------------
 # 🎁 보상 등록 + 랜덤 뽑기
@@ -107,19 +106,10 @@ if st.session_state.selected_reward:
     st.success(f"🎉 오늘의 보상: **{st.session_state.selected_reward}**")
 
 
-
-#타이머
-import time
-
-# 페이지 구성
-st.set_page_config(page_title="25분 타이머", layout="centered")
-st.title("⏳ 25분 집중 타이머")
-
-# 초기 세팅: 세션 상태 사용
-if "start_time" not in st.session_state:
-    st.session_state.start_time = None
-if "running" not in st.session_state:
-    st.session_state.running = False
+# --------------------------------------------------
+# ⏱ 타이머
+# --------------------------------------------------
+st.header("⏱ 25분 집중 타이머")
 
 # 타이머 시작 버튼 클릭 시 동작
 if st.button("▶️ 타이머 시작"):
@@ -147,7 +137,7 @@ if st.session_state.running:
         st.progress((total_seconds - remaining) / total_seconds)
 
         # 자동 새로고침 (1초마다)
-        st.experimental_rerun()
+        st.rerun()
 else:
     st.write("버튼을 눌러 타이머를 시작하세요.")
 
