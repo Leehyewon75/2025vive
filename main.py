@@ -71,3 +71,43 @@ st.markdown("## 💡 오늘의 동기 부여")
 
 if st.button("동기 부여 한마디"):
     st.info(random.choice(motivations))
+import streamlit as st
+
+st.set_page_config(page_title="체크리스트 앱", page_icon="✅", layout="centered")
+
+# 세션 상태 초기화
+if "checklist" not in st.session_state:
+    st.session_state.checklist = []
+
+st.title("✅ 나만의 체크리스트")
+
+# 항목 추가
+with st.form(key="add_item"):
+    new_item = st.text_input("새 항목 추가", placeholder="예: 책 읽기")
+    submitted = st.form_submit_button("➕ 추가하기")
+    if submitted and new_item.strip():
+        st.session_state.checklist.append({"text": new_item, "checked": False})
+        st.success("항목이 추가되었습니다!")
+
+# 체크리스트 표시
+st.markdown("## 📋 체크리스트")
+if not st.session_state.checklist:
+    st.info("아직 체크리스트 항목이 없습니다.")
+else:
+    for i, item in enumerate(st.session_state.checklist):
+        col1, col2 = st.columns([0.1, 0.9])
+        with col1:
+            checked = st.checkbox("", value=item["checked"], key=f"item_{i}")
+        with col2:
+            if checked:
+                st.markdown(f"~~{item['text']}~~")
+            else:
+                st.write(item["text"])
+        st.session_state.checklist[i]["checked"] = checked
+
+# 완료된 항목 수 요약
+total = len(st.session_state.checklist)
+completed = sum(1 for item in st.session_state.checklist if item["checked"])
+if total:
+    st.markdown(f"**🎉 완료된 항목: {completed} / {total}**")
+    st.progress(completed / total)
