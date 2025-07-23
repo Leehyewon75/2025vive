@@ -2,7 +2,6 @@ import streamlit as st
 import time
 import random
 from datetime import date
-import matplotlib.pyplot as plt
 
 # ------------------- 기본 설정 -------------------
 st.set_page_config(page_title="공부 앱 - 미루지 말자!", layout="centered")
@@ -140,7 +139,7 @@ if st.session_state.diary.get(today):
     st.markdown("📖 **오늘 쓴 일기 미리 보기:**")
     st.info(st.session_state.diary[today])
 
-# ------------------- 집중/휴식 시간 통계 -------------------
+# ------------------- 집중/휴식 누적 통계 -------------------
 st.markdown("---")
 st.header("📊 집중/휴식 누적 통계")
 
@@ -150,8 +149,8 @@ break_min = st.session_state.break_total // 60
 st.write(f"🧠 총 집중 시간: **{focus_min}분**")
 st.write(f"☕ 총 휴식 시간: **{break_min}분**")
 
-fig, ax = plt.subplots()
-ax.bar(["집중", "휴식"], [focus_min, break_min], width=0.5)
-ax.set_ylabel("시간 (분)")
-ax.set_title("집중 vs 휴식")
-st.pyplot(fig)
+# Streamlit 내장 바 차트
+chart_data = {
+    "시간(분)": [focus_min, break_min]
+}
+st.bar_chart(chart_data, use_container_width=True)
