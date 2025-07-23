@@ -42,7 +42,6 @@ import streamlit as st
 import time
 
 # 🔁 자동 새로고침: 1초마다
-st_autorefresh(interval=1000, key="auto_refresh")
 
 # ✅ 타이머 상태 초기화 함수 (먼저 정의!)
 def init_timers():
