@@ -71,32 +71,31 @@ from datetime import timedelta, datetime
 st.set_page_config(page_title="25분 타이머", layout="centered")
 st.title("🍅 뽀모도로 타이머")
 
-# 초기 세션 상태 설정
+# 초기 상태 설정
 if "start_time" not in st.session_state:
     st.session_state.start_time = None
 if "running" not in st.session_state:
     st.session_state.running = False
 
-TIMER_DURATION = timedelta(minutes=25)
+TIMER_DURATION_SECONDS = 25 * 60  # 1500초
 
-# 시작 버튼 클릭 시
+# 타이머 시작
 if st.button("▶️ 시작하기", type="primary"):
-    st.session_state.start_time = datetime.now()
+    st.session_state.start_time = time.time()
     st.session_state.running = True
 
-# 중지 버튼
+# 타이머 중지
 if st.session_state.running and st.button("⏹️ 중지하기"):
     st.session_state.running = False
     st.session_state.start_time = None
 
-# 타이머 실행
+# 타이머 실행 중일 때
 if st.session_state.running and st.session_state.start_time:
-    elapsed = datetime.now() - st.session_state.start_time
-    remaining = TIMER_DURATION - elapsed
+    elapsed = int(time.time() - st.session_state.start_time)
+    remaining = TIMER_DURATION_SECONDS - elapsed
 
-    # 남은 시간이 음수가 되지 않도록 제한
-    if remaining.total_seconds() > 0:
-        mins, secs = divmod(int(remaining.total_seconds() + 1), 60)  # ⬅️ +1초 보정
+    if remaining > 0:
+        mins, secs = divmod(remaining, 60)
         st.subheader(f"⏳ 남은 시간: {mins:02d}:{secs:02d}")
         time.sleep(1)
         st.experimental_rerun()
@@ -106,6 +105,7 @@ if st.session_state.running and st.session_state.start_time:
         st.success("✅ 25분 완료! 휴식하세요.")
 else:
     st.subheader("⏳ 대기 중...")
+
 
 # --------------------------------------------------
 # 🎁 보상 등록 + 랜덤 뽑기
