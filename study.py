@@ -130,12 +130,29 @@ with st.expander("📖 이전 일기 보기"):
 # ✅ 집중/휴식 기록 보기
 # -------------------------------
 with st.expander("⏱️ 집중/휴식 기록 보기"):
-    if not st.session_state.focus_log:
+    logs = st.session_state.get("focus_log", [])
+
+    if not logs:
         st.write("기록된 집중/휴식 시간이 없습니다.")
     else:
         import pandas as pd
-        df = pd.DataFrame(st.session_state.focus_log)
-        df["start"] = pd.to_datetime(df["start"]).dt.strftime("%H:%M:%S")
-        df["end"] = pd.to_datetime(df["end"]).dt.strftime("%H:%M:%S")
-        df["duration(min)"] = (df["duration"] / 60).round(1)
-        st.dataframe(df[["type", "start", "end", "duration(min)"]], use_container_width=True)
+
+        try:
+            df = pd.DataFrame(logs)
+
+            # 필요한 컬럼이 모두 있는지 확인
+            required_cols = {"type", "start", "end", "duration"}
+            if not required_cols.issubset(df.columns):
+                st.warning("기록 형식이 올바르지 않아 표시할 수 없습니다.")
+                st.write(df)
+            else:
+                # 시간 형식 변환 및 표시
+                df["start"] = pd.to_datetime(df["start"]).dt.strftime("%H:%M:%S")
+                df["end"] = pd.to_datetime(df["end"]).dt.strftime("%H:%M:%S")
+                df["duration(min)"] = (df["duration"] / 60).round(1)
+
+                st.dataframe(df[["type", "start", "end", "duration(min)"]], use_container_width=True)
+
+        except Exception as e:
+            st.error("기록을 불러오는 중 문제가 발생했습니다.")
+            st.exception(e)
