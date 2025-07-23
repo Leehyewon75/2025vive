@@ -1,11 +1,10 @@
 import streamlit as st
-import time
 import random
 from datetime import date
 
-st.set_page_config(page_title="공부 앱 - 미루지 말자!", layout="centered")
+st.set_page_config(page_title="공부 기록 앱 - 미루지 말자!", layout="centered")
 
-# 🌟 동기부여 문구
+# ------------------- 동기부여 문구 -------------------
 quotes = [
     "지금 하는 작은 노력이 내일의 큰 결과를 만든다.",
     "포기하지 마! 너는 할 수 있어 💪",
@@ -15,94 +14,34 @@ quotes = [
 ]
 st.markdown(f"### 🌟 {random.choice(quotes)}")
 
-# ---------------- 세션 상태 초기화 ----------------
-if "focus_running" not in st.session_state:
-    st.session_state.focus_running = False
-    st.session_state.focus_remaining = 25 * 60
-    st.session_state.focus_last_update = time.time()
-    st.session_state.focus_total = 0
-    st.session_state.focus_logged = False
-
-if "break_running" not in st.session_state:
-    st.session_state.break_running = False
-    st.session_state.break_remaining = 5 * 60
-    st.session_state.break_last_update = time.time()
-    st.session_state.break_total = 0
-    st.session_state.break_logged = False
-
+# ------------------- 세션 상태 초기화 -------------------
 if "checklist" not in st.session_state:
     st.session_state.checklist = []
-
-if "diary" not in st.session_state:
-    st.session_state.diary = {}
 
 if "new_task_input_val" not in st.session_state:
     st.session_state.new_task_input_val = ""
 
-# ---------------- 타이머 갱신 ----------------
-def update_timer(timer_type):
-    now = time.time()
-    if timer_type == "focus" and st.session_state.focus_running:
-        delta = now - st.session_state.focus_last_update
-        st.session_state.focus_remaining = max(0, st.session_state.focus_remaining - int(delta))
-        st.session_state.focus_last_update = now
-        if st.session_state.focus_remaining == 0 and not st.session_state.focus_logged:
-            st.session_state.focus_total += 25 * 60
-            st.session_state.focus_logged = True
-    elif timer_type == "break" and st.session_state.break_running:
-        delta = now - st.session_state.break_last_update
-        st.session_state.break_remaining = max(0, st.session_state.break_remaining - int(delta))
-        st.session_state.break_last_update = now
-        if st.session_state.break_remaining == 0 and not st.session_state.break_logged:
-            st.session_state.break_total += 5 * 60
-            st.session_state.break_logged = True
+if "diary" not in st.session_state:
+    st.session_state.diary = {}
 
-# ---------------- 집중 타이머 ----------------
-st.markdown("## ⏱️ 25분 집중 타이머")
-focus_col1, focus_col2, focus_col3 = st.columns(3)
-with focus_col1:
-    if st.button("▶️ 시작", key="focus_start"):
-        st.session_state.focus_running = True
-        st.session_state.focus_last_update = time.time()
-with focus_col2:
-    if st.button("⏸️ 일시정지", key="focus_pause"):
-        st.session_state.focus_running = False
-with focus_col3:
-    if st.button("🔁 초기화", key="focus_reset"):
-        st.session_state.focus_running = False
-        st.session_state.focus_remaining = 25 * 60
-        st.session_state.focus_logged = False
+if "goal_minutes" not in st.session_state:
+    st.session_state.goal_minutes = 0
 
-update_timer("focus")
-fmin, fsec = divmod(st.session_state.focus_remaining, 60)
-st.subheader(f"🕒 남은 집중 시간: {fmin:02d}:{fsec:02d}")
-if st.session_state.focus_remaining == 0:
-    st.success("🎉 집중 시간 종료! 휴식하세요.")
+if "focus_log" not in st.session_state:
+    st.session_state.focus_log = []
 
-# ---------------- 휴식 타이머 ----------------
+if "break_log" not in st.session_state:
+    st.session_state.break_log = []
+
+# ------------------- 오늘의 목표 입력 -------------------
 st.markdown("---")
-st.markdown("## 🛌 5분 휴식 타이머")
-break_col1, break_col2, break_col3 = st.columns(3)
-with break_col1:
-    if st.button("▶️ 시작", key="break_start"):
-        st.session_state.break_running = True
-        st.session_state.break_last_update = time.time()
-with break_col2:
-    if st.button("⏸️ 일시정지", key="break_pause"):
-        st.session_state.break_running = False
-with break_col3:
-    if st.button("🔁 초기화", key="break_reset"):
-        st.session_state.break_running = False
-        st.session_state.break_remaining = 5 * 60
-        st.session_state.break_logged = False
+st.header("🎯 오늘의 목표 집중 시간")
 
-update_timer("break")
-bmin, bsec = divmod(st.session_state.break_remaining, 60)
-st.subheader(f"🕒 남은 휴식 시간: {bmin:02d}:{bsec:02d}")
-if st.session_state.break_remaining == 0:
-    st.info("☕ 휴식 끝! 다시 집중해볼까요?")
+goal = st.number_input("오늘의 목표 집중 시간 (분)", min_value=0, max_value=1440, value=st.session_state.goal_minutes)
+st.session_state.goal_minutes = goal
+st.success(f"오늘의 목표: {goal}분 집중")
 
-# ---------------- 오늘의 할 일 ----------------
+# ------------------- 할 일 목록 -------------------
 st.markdown("---")
 st.header("✅ 오늘의 할 일")
 
@@ -113,10 +52,11 @@ if st.button("추가"):
         st.session_state.new_task_input_val = ""
 
 for i, item in enumerate(st.session_state.checklist):
-    checked = st.checkbox(item["text"], value=item["checked"], key=f"task_{i}")
+    key = f"task_{i}"
+    checked = st.checkbox(item["text"], value=item["checked"], key=key)
     st.session_state.checklist[i]["checked"] = checked
 
-# ---------------- 오늘의 일기 ----------------
+# ------------------- 오늘의 일기 -------------------
 st.markdown("---")
 st.header("📓 오늘의 일기")
 
@@ -131,14 +71,34 @@ if today in st.session_state.diary:
     st.markdown("📖 **오늘 쓴 일기 미리 보기:**")
     st.info(st.session_state.diary[today])
 
-# ---------------- 통계 ----------------
+# ------------------- 집중/휴식 기록 -------------------
+st.markdown("---")
+st.header("🧠 집중 / ☕ 휴식 시간 기록")
+
+with st.form("time_log_form"):
+    focus = st.number_input("오늘 추가한 집중 시간 (분)", min_value=0, step=1)
+    rest = st.number_input("오늘 추가한 휴식 시간 (분)", min_value=0, step=1)
+    submitted = st.form_submit_button("기록하기")
+
+    if submitted:
+        if focus > 0:
+            st.session_state.focus_log.append(focus)
+        if rest > 0:
+            st.session_state.break_log.append(rest)
+        st.success("⏱ 시간이 기록되었습니다!")
+
+# ------------------- 통계 -------------------
 st.markdown("---")
 st.header("📊 집중/휴식 누적 통계")
 
-focus_min = st.session_state.focus_total // 60
-break_min = st.session_state.break_total // 60
+total_focus = sum(st.session_state.focus_log)
+total_break = sum(st.session_state.break_log)
 
-st.write(f"🧠 총 집중 시간: **{focus_min}분**")
-st.write(f"☕ 총 휴식 시간: **{break_min}분**")
+progress = min(100, int((total_focus / st.session_state.goal_minutes) * 100)) if st.session_state.goal_minutes > 0 else 0
+st.progress(progress / 100)
 
-st.bar_chart({"집중": [focus_min], "휴식": [break_min]})
+st.write(f"🧠 총 집중 시간: **{total_focus}분**")
+st.write(f"☕ 총 휴식 시간: **{total_break}분**")
+st.write(f"🎯 목표 달성률: **{progress}%**")
+
+st.bar_chart({"집중": [total_focus], "휴식": [total_break]})
