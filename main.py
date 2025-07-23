@@ -2,7 +2,7 @@ import streamlit as st
 import time
 import random
 import hashlib
-from datetime import date
+from datetime
 
 st.set_page_config(page_title="미루지 말자!", layout="centered")
 
