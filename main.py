@@ -278,3 +278,79 @@ else:
 # 선택된 보상 결과 출력
 if st.session_state.selected_reward:
     st.success(f"🎉 오늘의 보상: **{st.session_state.selected_reward}**")
+import streamlit as st
+import time
+
+st.set_page_config(page_title="25분 타이머", layout="centered")
+
+# ------------------------
+# 세션 상태 초기화
+# ------------------------
+if "timer_running" not in st.session_state:
+    st.session_state.timer_running = False
+
+if "start_time" not in st.session_state:
+    st.session_state.start_time = None
+
+if "paused" not in st.session_state:
+    st.session_state.paused = False
+
+if "elapsed" not in st.session_state:
+    st.session_state.elapsed = 0
+
+TIMER_DURATION = 25 * 60  # 25분 = 1500초
+
+st.title("⏱️ 25분 집중 타이머")
+
+# ------------------------
+# 버튼 제어
+# ------------------------
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    if st.button("▶️ 시작", disabled=st.session_state.timer_running):
+        st.session_state.start_time = time.time() - st.session_state.elapsed
+        st.session_state.timer_running = True
+        st.session_state.paused = False
+
+with col2:
+    if st.button("⏸ 일시정지", disabled=not st.session_state.timer_running or st.session_state.paused):
+        st.session_state.paused = True
+        st.session_state.elapsed = time.time() - st.session_state.start_time
+        st.session_state.timer_running = False
+
+with col3:
+    if st.button("🔁 리셋"):
+        st.session_state.timer_running = False
+        st.session_state.paused = False
+        st.session_state.start_time = None
+        st.session_state.elapsed = 0
+
+# ------------------------
+# 타이머 표시
+# ------------------------
+placeholder = st.empty()
+
+if st.session_state.timer_running and not st.session_state.paused:
+    elapsed = time.time() - st.session_state.start_time
+else:
+    elapsed = st.session_state.elapsed
+
+remaining = max(0, TIMER_DURATION - int(elapsed))
+minutes, seconds = divmod(remaining, 60)
+placeholder.markdown(f"## ⏳ 남은 시간: **{minutes:02d}:{seconds:02d}**")
+
+# ------------------------
+# 타이머 완료
+# ------------------------
+if remaining == 0 and st.session_state.timer_running:
+    st.session_state.timer_running = False
+    st.session_state.paused = False
+    st.success("🎉 25분 집중 완료! 휴식하세요.")
+    st.balloons()
+
+# ------------------------
+# 자동 갱신 (1초마다)
+# ------------------------
+if st.session_state.timer_running:
+    st.experimental_rerun()
