@@ -51,14 +51,6 @@ for i, item in enumerate(st.session_state.checklist):
     checked = st.checkbox(item["text"], value=item["checked"], key=key)
     st.session_state.checklist[i]["checked"] = checked
 
-# ------------------- 2. 목표 집중 시간 -------------------
-st.markdown("---")
-st.header("🎯 오늘의 목표 집중 시간")
-
-goal = st.number_input("오늘의 목표 집중 시간 (분)", min_value=0, max_value=1440, value=st.session_state.goal_minutes)
-st.session_state.goal_minutes = goal
-st.info(f"오늘의 목표: **{goal}분** 집중")
-
 # ------------------- 3. 동기부여 -------------------
 st.markdown("---")
 st.header("💬 동기부여 한 마디")
