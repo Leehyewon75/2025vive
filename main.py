@@ -2,7 +2,7 @@ import streamlit as st
 import time
 import random
 import hashlib
-from datetime
+import datetime  # 수정된 부분
 
 st.set_page_config(page_title="미루지 말자!", layout="centered")
 
@@ -33,7 +33,6 @@ if "elapsed" not in st.session_state:
 
 if "running" not in st.session_state:
     st.session_state.running = False
-
 
 # --------------------------------------------------
 # 📋 체크리스트
@@ -105,25 +104,21 @@ else:
 if st.session_state.selected_reward:
     st.success(f"🎉 오늘의 보상: **{st.session_state.selected_reward}**")
 
-
 # --------------------------------------------------
 # ⏱ 타이머
 # --------------------------------------------------
 st.header("⏱ 25분 집중 타이머")
 
-# 타이머 시작 버튼 클릭 시 동작
 if st.button("▶️ 타이머 시작"):
     st.session_state.start_time = time.time()
     st.session_state.running = True
 
-# 타이머 중단 버튼
 if st.button("⏹️ 타이머 중단"):
     st.session_state.running = False
 
-# 타이머 시간 설정 (25분 = 1500초)
+# 25분 타이머 설정
 total_seconds = 25 * 60
 
-# 타이머 동작
 if st.session_state.running:
     elapsed = int(time.time() - st.session_state.start_time)
     remaining = total_seconds - elapsed
@@ -136,18 +131,17 @@ if st.session_state.running:
         st.subheader(f"{mins:02d}:{secs:02d} 남음")
         st.progress((total_seconds - remaining) / total_seconds)
 
-        # 자동 새로고침 (1초마다)
+        # 1초마다 자동 새로고침
         st.rerun()
 else:
     st.write("버튼을 눌러 타이머를 시작하세요.")
-
 
 # --------------------------------------------------
 # 📝 일기 기능
 # --------------------------------------------------
 st.header("📝 오늘의 일기")
 
-today = date.today().isoformat()
+today = datetime.date.today().isoformat()  # 수정된 부분
 default_text = st.session_state.diary_entries.get(today, "")
 diary = st.text_area("오늘 하루 어땠나요?", value=default_text, height=200)
 
@@ -155,7 +149,6 @@ if st.button("💾 일기 저장"):
     st.session_state.diary_entries[today] = diary
     st.success("일기가 저장되었습니다.")
 
-# 이전 일기 열람
 if st.session_state.diary_entries:
     st.subheader("📚 이전 일기 보기")
     dates = sorted(st.session_state.diary_entries.keys(), reverse=True)
