@@ -38,6 +38,32 @@ def init_state():
         if k not in st.session_state:
             st.session_state[k] = v
 
+import streamlit as st
+import time
+from streamlit_autorefresh import st_autorefresh
+
+# 🔁 자동 새로고침: 1초마다
+st_autorefresh(interval=1000, key="auto_refresh")
+
+# ✅ 타이머 상태 초기화 함수 (먼저 정의!)
+def init_timers():
+    defaults = {
+        "focus_running": False,
+        "focus_start": None,
+        "focus_remaining": 25 * 60,
+        "focus_total": 0,
+        "focus_logged": False,
+        "break_running": False,
+        "break_start": None,
+        "break_remaining": 5 * 60,
+        "break_total": 0,
+        "break_logged": False
+    }
+    for k, v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
+
+# ✅ 함수 호출 (정의 아래에서!)
 init_timers()
 
 # ---------------- 집중 타이머 ----------------
@@ -64,7 +90,6 @@ if st.session_state.focus_running:
     st.session_state.focus_remaining = max(0, st.session_state.focus_remaining - elapsed)
     st.session_state.focus_start = time.time()
 
-    # 통계 누적
     if st.session_state.focus_remaining == 0 and not st.session_state.focus_logged:
         st.session_state.focus_total += 25 * 60
         st.session_state.focus_logged = True
@@ -72,7 +97,7 @@ if st.session_state.focus_running:
 fmin, fsec = divmod(st.session_state.focus_remaining, 60)
 st.subheader(f"🧠 남은 집중 시간: {fmin:02d}:{fsec:02d}")
 if st.session_state.focus_remaining == 0:
-    st.success("🎉 집중 시간 끝! 이제 휴식해요.")
+    st.success("🎉 집중 시간 종료! 이제 휴식해요.")
 
 # ---------------- 휴식 타이머 ----------------
 st.markdown("---")
@@ -99,7 +124,6 @@ if st.session_state.break_running:
     st.session_state.break_remaining = max(0, st.session_state.break_remaining - elapsed)
     st.session_state.break_start = time.time()
 
-    # 통계 누적
     if st.session_state.break_remaining == 0 and not st.session_state.break_logged:
         st.session_state.break_total += 5 * 60
         st.session_state.break_logged = True
