@@ -103,3 +103,6 @@ if len(usernames) > 1:
 else:
     st.info("비교하려면 최소 2명의 사용자가 필요합니다. 사이드바에서 이름을 바꿔 추가해보세요.")
 pip install matplotlib
+streamlit
+matplotlib
+pandas
