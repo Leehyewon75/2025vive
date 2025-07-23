@@ -16,120 +16,75 @@ quotes = [
 ]
 st.markdown(f"### 🌟 {random.choice(quotes)}")
 
-# 세션 상태 초기화
-def init_state():
-    keys_defaults = {
-        "focus_running": False,
-        "focus_paused": False,
-        "focus_start": None,
-        "focus_remaining": 25 * 60,
-        "focus_total": 0,
-        "focus_logged": False,
-        "break_running": False,
-        "break_paused": False,
-        "break_start": None,
-        "break_remaining": 5 * 60,
-        "break_total": 0,
-        "break_logged": False,
-        "checklist": [],
-        "diary": {},
-    }
-    for k, v in keys_defaults.items():
-        if k not in st.session_state:
-            st.session_state[k] = v
+# ---------------- 세션 상태 초기화 ----------------
+if "focus_running" not in st.session_state:
+    st.session_state.focus_running = False
+    st.session_state.focus_remaining = 25 * 60
+    st.session_state.focus_last_update = time.time()
 
-import streamlit as st
-import time
+if "break_running" not in st.session_state:
+    st.session_state.break_running = False
+    st.session_state.break_remaining = 5 * 60
+    st.session_state.break_last_update = time.time()
 
-# 🔁 자동 새로고침: 1초마다
-
-# ✅ 타이머 상태 초기화 함수 (먼저 정의!)
-def init_timers():
-    defaults = {
-        "focus_running": False,
-        "focus_start": None,
-        "focus_remaining": 25 * 60,
-        "focus_total": 0,
-        "focus_logged": False,
-        "break_running": False,
-        "break_start": None,
-        "break_remaining": 5 * 60,
-        "break_total": 0,
-        "break_logged": False
-    }
-    for k, v in defaults.items():
-        if k not in st.session_state:
-            st.session_state[k] = v
-
-# ✅ 함수 호출 (정의 아래에서!)
-init_timers()
+# ---------------- 타이머 로직 (업데이트용) ----------------
+def update_timer(timer_type):
+    now = time.time()
+    if timer_type == "focus" and st.session_state.focus_running:
+        delta = now - st.session_state.focus_last_update
+        st.session_state.focus_remaining = max(0, st.session_state.focus_remaining - int(delta))
+        st.session_state.focus_last_update = now
+    elif timer_type == "break" and st.session_state.break_running:
+        delta = now - st.session_state.break_last_update
+        st.session_state.break_remaining = max(0, st.session_state.break_remaining - int(delta))
+        st.session_state.break_last_update = now
 
 # ---------------- 집중 타이머 ----------------
 st.markdown("## ⏱️ 25분 집중 타이머")
 
-c1, c2, c3 = st.columns(3)
-with c1:
-    if st.button("▶️ 집중 시작"):
-        if not st.session_state.focus_running:
-            st.session_state.focus_start = time.time()
-            st.session_state.focus_running = True
-with c2:
-    if st.button("⏸️ 집중 일시정지"):
+focus_col1, focus_col2, focus_col3 = st.columns(3)
+with focus_col1:
+    if st.button("▶️ 시작", key="focus_start_btn"):
+        st.session_state.focus_running = True
+        st.session_state.focus_last_update = time.time()
+with focus_col2:
+    if st.button("⏸️ 일시정지", key="focus_pause_btn"):
         st.session_state.focus_running = False
-with c3:
-    if st.button("🔁 집중 초기화"):
+with focus_col3:
+    if st.button("🔁 초기화", key="focus_reset_btn"):
         st.session_state.focus_running = False
         st.session_state.focus_remaining = 25 * 60
-        st.session_state.focus_logged = False
 
-# 남은 시간 갱신
-if st.session_state.focus_running:
-    elapsed = int(time.time() - st.session_state.focus_start)
-    st.session_state.focus_remaining = max(0, st.session_state.focus_remaining - elapsed)
-    st.session_state.focus_start = time.time()
-
-    if st.session_state.focus_remaining == 0 and not st.session_state.focus_logged:
-        st.session_state.focus_total += 25 * 60
-        st.session_state.focus_logged = True
+update_timer("focus")
 
 fmin, fsec = divmod(st.session_state.focus_remaining, 60)
-st.subheader(f"🧠 남은 집중 시간: {fmin:02d}:{fsec:02d}")
+st.subheader(f"🕒 남은 집중 시간: {fmin:02d}:{fsec:02d}")
 if st.session_state.focus_remaining == 0:
-    st.success("🎉 집중 시간 종료! 이제 휴식해요.")
+    st.success("🎉 집중 시간 종료! 휴식하세요.")
 
 # ---------------- 휴식 타이머 ----------------
 st.markdown("---")
 st.markdown("## 🛌 5분 휴식 타이머")
 
-b1, b2, b3 = st.columns(3)
-with b1:
-    if st.button("▶️ 휴식 시작"):
-        if not st.session_state.break_running:
-            st.session_state.break_start = time.time()
-            st.session_state.break_running = True
-with b2:
-    if st.button("⏸️ 휴식 일시정지"):
+break_col1, break_col2, break_col3 = st.columns(3)
+with break_col1:
+    if st.button("▶️ 시작", key="break_start_btn"):
+        st.session_state.break_running = True
+        st.session_state.break_last_update = time.time()
+with break_col2:
+    if st.button("⏸️ 일시정지", key="break_pause_btn"):
         st.session_state.break_running = False
-with b3:
-    if st.button("🔁 휴식 초기화"):
+with break_col3:
+    if st.button("🔁 초기화", key="break_reset_btn"):
         st.session_state.break_running = False
         st.session_state.break_remaining = 5 * 60
-        st.session_state.break_logged = False
 
-# 남은 시간 갱신
-if st.session_state.break_running:
-    elapsed = int(time.time() - st.session_state.break_start)
-    st.session_state.break_remaining = max(0, st.session_state.break_remaining - elapsed)
-    st.session_state.break_start = time.time()
-
-    if st.session_state.break_remaining == 0 and not st.session_state.break_logged:
-        st.session_state.break_total += 5 * 60
-        st.session_state.break_logged = True
+update_timer("break")
 
 bmin, bsec = divmod(st.session_state.break_remaining, 60)
-st.subheader(f"☕ 남은 휴식 시간: {bmin:02d}:{bsec:02d}")
+st.subheader(f"🕒 남은 휴식 시간: {bmin:02d}:{bsec:02d}")
 if st.session_state.break_remaining == 0:
-    st.info("🔔 휴식 끝! 다시 집중할 시간이에요.")
+    st.info("☕ 휴식 끝! 다시 집중해볼까요?")
 
 # ---------------- To-Do 리스트 ----------------
 st.markdown("---")
