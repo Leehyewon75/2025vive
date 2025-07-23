@@ -2,10 +2,6 @@ import streamlit as st
 import time
 import random
 from datetime import date
-from streamlit_autorefresh import st_autorefresh  # ✅ 자동 새로고침
-
-# ✅ 자동 새로고침: 1초마다 새로고침
-st_autorefresh(interval=1000, limit=None, key="autorefresh")
 
 st.set_page_config(page_title="공부 앱 - 미루지 말자!", layout="centered")
 
@@ -55,7 +51,7 @@ for i, item in enumerate(st.session_state.checklist):
     checked = st.checkbox(item["text"], value=item["checked"], key=key)
     st.session_state.checklist[i]["checked"] = checked
 
-# ---------------- 2. 목표 입력 ----------------
+# ---------------- 2. 목표 집중 시간 ----------------
 st.markdown("---")
 st.header("🎯 오늘의 목표 집중 시간")
 
@@ -135,7 +131,7 @@ with break_col3:
 if st.session_state.break_remaining == 0:
     st.info("☕ 휴식 종료! 다시 집중해볼까요?")
 
-# ---------------- 6. 집중/휴식 수동 기록 ----------------
+# ---------------- 6. 수동 집중/휴식 기록 ----------------
 st.markdown("---")
 st.header("🧠 수동 집중 / ☕ 휴식 시간 기록")
 
