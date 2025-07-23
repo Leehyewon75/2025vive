@@ -27,7 +27,7 @@ if "motivation" not in st.session_state:
     st.session_state.motivation = ""
 
 # ------------------- 1. 할 일 목록 -------------------
-st.header("✅ 오늘의 할 일")
+st.header("✅ to do list")
 
 new_task = st.text_input("할 일을 입력하세요", value=st.session_state.new_task_input_val)
 if st.button("추가"):
@@ -42,7 +42,7 @@ for i, item in enumerate(st.session_state.checklist):
 
 # ------------------- 2. 목표 입력 -------------------
 st.markdown("---")
-st.header("🎯 오늘의 목표 집중 시간")
+st.header("🎯 목표 집중 시간")
 
 goal = st.number_input("오늘의 목표 집중 시간 (분)", min_value=0, max_value=1440, value=st.session_state.goal_minutes)
 st.session_state.goal_minutes = goal
