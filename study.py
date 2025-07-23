@@ -128,14 +128,24 @@ if st.session_state.break_remaining == 0:
 st.markdown("---")
 st.header("✅ 오늘의 할 일")
 
+# 할 일 입력창
 new_task = st.text_input("할 일을 입력하세요", key="new_task_input")
-if st.button("추가"):
-    if new_task:
-        st.session_state.checklist.append({"text": new_task, "checked": False})
-        st.experimental_rerun()
 
-for i, task in enumerate(st.session_state.checklist):
-    checked = st.checkbox(task["text"], value=task["checked"], key=f"task_{i}")
+# 추가 버튼
+if st.button("추가"):
+    if new_task.strip():  # 빈 문자열 입력 방지
+        if "checklist" not in st.session_state:
+            st.session_state.checklist = []
+        st.session_state.checklist.append({"text": new_task.strip(), "checked": False})
+        st.experimental_rerun()  # 입력창 초기화 & UI 갱신
+
+# 체크박스 리스트 표시
+if "checklist" not in st.session_state:
+    st.session_state.checklist = []
+
+for i, item in enumerate(st.session_state.checklist):
+    task_key = f"task_{i}_{item['text']}"
+    checked = st.checkbox(item["text"], value=item["checked"], key=task_key)
     st.session_state.checklist[i]["checked"] = checked
 
 # ---------------- 일기 ----------------
