@@ -359,3 +359,13 @@ if st.session_state.timer_running:
 
 # 수정 코드 (텍스트와 인덱스를 조합하여 고유 키 생성)
 checked = st.checkbox(item["text"], value=item["checked"], key=f"task_{i}_{item['text']}")
+import hashlib
+
+def get_safe_key(text, index):
+    return f"task_{index}_" + hashlib.md5(text.encode()).hexdigest()
+
+# 사용
+for i, item in enumerate(st.session_state.checklist):
+    key = get_safe_key(item["text"], i)
+    checked = st.checkbox(item["text"], value=item["checked"], key=key)
+    st.session_state.checklist[i]["checked"] = checked
