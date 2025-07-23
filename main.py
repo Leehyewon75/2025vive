@@ -187,3 +187,94 @@ else:
 # 뽑은 보상 표시
 if st.session_state.reward_drawn:
     st.success(f"🎉 오늘의 보상은... **{st.session_state.reward_drawn}** 입니다!")
+import streamlit as st
+import random
+
+st.set_page_config(page_title="카테고리 보상 체크리스트", page_icon="🎯", layout="centered")
+
+# 세션 상태 초기화
+if "checklist" not in st.session_state:
+    st.session_state.checklist = []
+
+if "reward_categories" not in st.session_state:
+    st.session_state.reward_categories = {}  # {'음식': [보상1, 보상2], '휴식': [보상3]}
+
+if "selected_reward" not in st.session_state:
+    st.session_state.selected_reward = None
+
+# -------------------------------------
+# 체크리스트 기능
+# -------------------------------------
+st.title("✅ 할 일 체크 + 🎁 카테고리별 보상")
+
+st.header("📋 오늘의 할 일")
+
+with st.form("task_form"):
+    new_task = st.text_input("할 일 입력", placeholder="예: 운동 30분")
+    add_task = st.form_submit_button("➕ 추가")
+    if add_task and new_task.strip():
+        st.session_state.checklist.append({"text": new_task, "checked": False})
+        st.success("할 일이 추가되었습니다!")
+
+# 할 일 표시
+if st.session_state.checklist:
+    for i, item in enumerate(st.session_state.checklist):
+        checked = st.checkbox(item["text"], value=item["checked"], key=f"task_{i}")
+        st.session_state.checklist[i]["checked"] = checked
+
+    completed = sum(1 for t in st.session_state.checklist if t["checked"])
+    total = len(st.session_state.checklist)
+    st.markdown(f"**진행 상황: {completed} / {total} 완료됨**")
+    st.progress(completed / total if total > 0 else 0)
+else:
+    st.info("할 일을 추가해보세요!")
+
+# -------------------------------------
+# 보상 등록: 카테고리별로
+# -------------------------------------
+st.header("🎁 내가 좋아하는 보상 등록 (카테고리별)")
+
+with st.form("reward_form"):
+    category = st.text_input("카테고리 입력 (예: 음식, 휴식, 게임 등)", placeholder="예: 음식")
+    reward_item = st.text_input("보상 내용 입력", placeholder="예: 초콜릿 먹기")
+    add_reward = st.form_submit_button("🎉 보상 추가")
+    if add_reward and category.strip() and reward_item.strip():
+        if category not in st.session_state.reward_categories:
+            st.session_state.reward_categories[category] = []
+        st.session_state.reward_categories[category].append(reward_item)
+        st.success(f"[{category}] 카테고리에 보상이 추가되었습니다!")
+
+# 보상 리스트 출력
+if st.session_state.reward_categories:
+    st.subheader("📦 등록된 보상 목록")
+    for cat, rewards in st.session_state.reward_categories.items():
+        st.markdown(f"**🗂️ {cat}**")
+        for r in rewards:
+            st.write(f"• {r}")
+else:
+    st.info("보상을 카테고리와 함께 등록해보세요!")
+
+# -------------------------------------
+# 보상 뽑기 (할 일 완료 시)
+# -------------------------------------
+st.header("🏆 보상 뽑기")
+
+if completed == total and total > 0:
+    category_list = list(st.session_state.reward_categories.keys())
+    if category_list:
+        selected_category = st.selectbox("어떤 카테고리에서 보상을 뽑을까요?", category_list)
+
+        if st.button("🎲 보상 랜덤 뽑기"):
+            reward_pool = st.session_state.reward_categories.get(selected_category, [])
+            if reward_pool:
+                st.session_state.selected_reward = random.choice(reward_pool)
+            else:
+                st.warning("해당 카테고리에 보상이 없습니다.")
+    else:
+        st.warning("보상 카테고리가 없습니다. 먼저 보상을 추가하세요.")
+else:
+    st.info("체크리스트를 모두 완료하면 보상을 뽑을 수 있어요!")
+
+# 선택된 보상 결과 출력
+if st.session_state.selected_reward:
+    st.success(f"🎉 오늘의 보상: **{st.session_state.selected_reward}**")
