@@ -158,19 +158,25 @@ for i, item in enumerate(st.session_state.checklist):
     task_key = f"task_{i}_{item['text']}"
     checked = st.checkbox(item["text"], value=item["checked"], key=task_key)
     st.session_state.checklist[i]["checked"] = checked
-# ---------------- 일기 ----------------
-st.markdown("---")
-st.header("📓 오늘의 일기")
+# ------------------- 오늘의 일기 -------------------
+import datetime
+today = datetime.date.today().isoformat()
 
-today = date.today().isoformat()
+# ✅ diary 상태 초기화
+if "diary" not in st.session_state:
+    st.session_state.diary = {}
+
+# ✅ 에러 없이 접근
 diary_text = st.text_area("오늘 하루를 기록해보세요", value=st.session_state.diary.get(today, ""), height=200)
+
 if st.button("💾 일기 저장"):
     st.session_state.diary[today] = diary_text
-    st.success("✅ 일기가 저장되었습니다!")
+    st.success("✅ 오늘의 일기가 저장되었습니다!")
 
-if st.session_state.diary.get(today):
+if today in st.session_state.diary:
     st.markdown("📖 **오늘 쓴 일기 미리 보기:**")
     st.info(st.session_state.diary[today])
+
 
 # ---------------- 통계 ----------------
 st.markdown("---")
