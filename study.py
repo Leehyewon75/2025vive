@@ -4,16 +4,6 @@ from datetime import date
 
 st.set_page_config(page_title="공부 기록 앱 - 미루지 말자!", layout="centered")
 
-# ------------------- 동기부여 문구 -------------------
-quotes = [
-     "시작이 반이다 💪",
-    "5분만 해보자, 그다음은 생각하지 말자!",
-    "완벽하지 않아도 괜찮아. 일단 시작!",
-    "너는 해낼 수 있어. 작은 한 걸음부터!",
-    "포기하지 마. 조금씩 앞으로 가자!"
-]
-st.markdown(f"### 🌟 {random.choice(quotes)}")
-
 # ------------------- 세션 상태 초기화 -------------------
 if "checklist" not in st.session_state:
     st.session_state.checklist = []
@@ -33,13 +23,33 @@ if "focus_log" not in st.session_state:
 if "break_log" not in st.session_state:
     st.session_state.break_log = []
 
+if "motivation" not in st.session_state:
+    st.session_state.motivation = ""
+
+# ------------------- 동기부여 문구 -------------------
+quotes = [
+    "시작이 반이다 💪",
+    "5분만 해보자, 그다음은 생각하지 말자!",
+    "완벽하지 않아도 괜찮아. 일단 시작!",
+    "너는 해낼 수 있어. 작은 한 걸음부터!",
+    "포기하지 마. 조금씩 앞으로 가자!"
+]
+
+st.markdown("## 💬 동기부여 한 마디")
+
+if st.button("🎯 동기부여 듣기"):
+    st.session_state.motivation = random.choice(quotes)
+
+if st.session_state.motivation:
+    st.success(f"🌟 {st.session_state.motivation}")
+
 # ------------------- 오늘의 목표 입력 -------------------
 st.markdown("---")
 st.header("🎯 오늘의 목표 집중 시간")
 
 goal = st.number_input("오늘의 목표 집중 시간 (분)", min_value=0, max_value=1440, value=st.session_state.goal_minutes)
 st.session_state.goal_minutes = goal
-st.success(f"오늘의 목표: {goal}분 집중")
+st.info(f"오늘의 목표: **{goal}분** 집중")
 
 # ------------------- 할 일 목록 -------------------
 st.markdown("---")
@@ -71,7 +81,7 @@ if today in st.session_state.diary:
     st.markdown("📖 **오늘 쓴 일기 미리 보기:**")
     st.info(st.session_state.diary[today])
 
-# ------------------- 집중/휴식 기록 -------------------
+# ------------------- 집중/휴식 시간 기록 -------------------
 st.markdown("---")
 st.header("🧠 집중 / ☕ 휴식 시간 기록")
 
@@ -86,19 +96,3 @@ with st.form("time_log_form"):
         if rest > 0:
             st.session_state.break_log.append(rest)
         st.success("⏱ 시간이 기록되었습니다!")
-
-# ------------------- 통계 -------------------
-st.markdown("---")
-st.header("📊 집중/휴식 누적 통계")
-
-total_focus = sum(st.session_state.focus_log)
-total_break = sum(st.session_state.break_log)
-
-progress = min(100, int((total_focus / st.session_state.goal_minutes) * 100)) if st.session_state.goal_minutes > 0 else 0
-st.progress(progress / 100)
-
-st.write(f"🧠 총 집중 시간: **{total_focus}분**")
-st.write(f"☕ 총 휴식 시간: **{total_break}분**")
-st.write(f"🎯 목표 달성률: **{progress}%**")
-
-st.bar_chart({"집중": [total_focus], "휴식": [total_break]})
