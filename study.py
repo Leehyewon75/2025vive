@@ -174,6 +174,7 @@ break_min = st.session_state.break_total // 60
 
 st.write(f"🧠 총 집중 시간: **{focus_min}분**")
 st.write(f"☕ 총 휴식 시간: **{break_min}분**")
+
 placeholder = st.empty()
 while 조건:
     with placeholder.container():
