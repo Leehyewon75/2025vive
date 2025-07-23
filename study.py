@@ -103,3 +103,39 @@ if today in st.session_state.diary:
     st.markdown("📖 **오늘 쓴 일기 미리 보기:**")
     st.info(st.session_state.diary[today])
 
+import streamlit as st
+from datetime import date, datetime
+
+# -------------------------------
+# ✅ 세션 초기화
+# -------------------------------
+if "journals" not in st.session_state:
+    st.session_state.journals = {}  # {"2025-07-23": "오늘 열심히 했다!"}
+
+if "focus_log" not in st.session_state:
+    st.session_state.focus_log = []  # [{"type": "focus", "start": ..., "end": ..., "duration": ...}]
+
+# -------------------------------
+# ✅ 이전 일기 보기
+# -------------------------------
+with st.expander("📖 이전 일기 보기"):
+    if not st.session_state.journals:
+        st.write("아직 저장된 일기가 없습니다.")
+    else:
+        for day, text in sorted(st.session_state.journals.items(), reverse=True):
+            with st.expander(f"🗓️ {day}의 일기"):
+                st.write(text)
+
+# -------------------------------
+# ✅ 집중/휴식 기록 보기
+# -------------------------------
+with st.expander("⏱️ 집중/휴식 기록 보기"):
+    if not st.session_state.focus_log:
+        st.write("기록된 집중/휴식 시간이 없습니다.")
+    else:
+        import pandas as pd
+        df = pd.DataFrame(st.session_state.focus_log)
+        df["start"] = pd.to_datetime(df["start"]).dt.strftime("%H:%M:%S")
+        df["end"] = pd.to_datetime(df["end"]).dt.strftime("%H:%M:%S")
+        df["duration(min)"] = (df["duration"] / 60).round(1)
+        st.dataframe(df[["type", "start", "end", "duration(min)"]], use_container_width=True)
