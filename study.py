@@ -95,8 +95,7 @@ new_task = st.text_input("할 일을 입력하세요", key="new_task_input")
 if st.button("추가"):
     if new_task:
         st.session_state.checklist.append({"text": new_task, "checked": False})
-        st.experimental_rerun()
-
+       st.session_state["new_task_input"] = ""  # 입력창 초기화 효과
 for i, item in enumerate(st.session_state.checklist):
     checked = st.checkbox(item["text"], value=item["checked"], key=f"task_{i}")
     st.session_state.checklist[i]["checked"] = checked
