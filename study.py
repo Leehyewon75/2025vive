@@ -103,18 +103,3 @@ if today in st.session_state.diary:
     st.markdown("📖 **오늘 쓴 일기 미리 보기:**")
     st.info(st.session_state.diary[today])
 
-# ------------------- 통계 -------------------
-st.markdown("---")
-st.header("📊 집중/휴식 누적 통계")
-
-total_focus = sum(st.session_state.focus_log)
-total_break = sum(st.session_state.break_log)
-
-progress = min(100, int((total_focus / st.session_state.goal_minutes) * 100)) if st.session_state.goal_minutes > 0 else 0
-st.progress(progress / 100)
-
-st.write(f"🧠 총 집중 시간: **{total_focus}분**")
-st.write(f"☕ 총 휴식 시간: **{total_break}분**")
-st.write(f"🎯 목표 달성률: **{progress}%**")
-
-st.bar_chart({"집중": [total_focus], "휴식": [total_break]})
