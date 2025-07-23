@@ -1,30 +1,41 @@
 import streamlit as st
+import time
 import random
 from datetime import date
 
-st.set_page_config(page_title="공부 기록 앱 - 미루지 말자!", layout="centered")
+st.set_page_config(page_title="공부 앱 - 미루지 말자!", layout="centered")
 
-# ------------------- 세션 상태 초기화 -------------------
-if "checklist" not in st.session_state:
-    st.session_state.checklist = []
+# ------------------- 세션 초기화 -------------------
+def init_state():
+    st.session_state.setdefault("focus_running", False)
+    st.session_state.setdefault("focus_remaining", 25 * 60)
+    st.session_state.setdefault("focus_last_update", time.time())
 
-if "new_task_input_val" not in st.session_state:
-    st.session_state.new_task_input_val = ""
+    st.session_state.setdefault("break_running", False)
+    st.session_state.setdefault("break_remaining", 5 * 60)
+    st.session_state.setdefault("break_last_update", time.time())
 
-if "diary" not in st.session_state:
-    st.session_state.diary = {}
+    st.session_state.setdefault("checklist", [])
+    st.session_state.setdefault("new_task_input_val", "")
+    st.session_state.setdefault("diary", {})
+    st.session_state.setdefault("goal_minutes", 0)
+    st.session_state.setdefault("focus_log", [])
+    st.session_state.setdefault("break_log", [])
+    st.session_state.setdefault("motivation", "")
 
-if "goal_minutes" not in st.session_state:
-    st.session_state.goal_minutes = 0
+init_state()
 
-if "focus_log" not in st.session_state:
-    st.session_state.focus_log = []
-
-if "break_log" not in st.session_state:
-    st.session_state.break_log = []
-
-if "motivation" not in st.session_state:
-    st.session_state.motivation = ""
+# ------------------- 타이머 업데이트 -------------------
+def update_timer(timer_type):
+    now = time.time()
+    if timer_type == "focus" and st.session_state.focus_running:
+        elapsed = int(now - st.session_state.focus_last_update)
+        st.session_state.focus_remaining = max(0, st.session_state.focus_remaining - elapsed)
+        st.session_state.focus_last_update = now
+    elif timer_type == "break" and st.session_state.break_running:
+        elapsed = int(now - st.session_state.break_last_update)
+        st.session_state.break_remaining = max(0, st.session_state.break_remaining - elapsed)
+        st.session_state.break_last_update = now
 
 # ------------------- 1. 할 일 목록 -------------------
 st.header("✅ 오늘의 할 일")
@@ -40,7 +51,7 @@ for i, item in enumerate(st.session_state.checklist):
     checked = st.checkbox(item["text"], value=item["checked"], key=key)
     st.session_state.checklist[i]["checked"] = checked
 
-# ------------------- 2. 목표 입력 -------------------
+# ------------------- 2. 목표 집중 시간 -------------------
 st.markdown("---")
 st.header("🎯 오늘의 목표 집중 시간")
 
@@ -57,7 +68,7 @@ quotes = [
     "5분만 해보자, 그다음은 생각하지 말자!",
     "완벽하지 않아도 괜찮아. 일단 시작!",
     "너는 해낼 수 있어. 작은 한 걸음부터!",
-    "포기하지 마. 조금씩 앞으로 나아가자!",
+    "포기하지 마. 조금씩 앞으로 가자!",
     "느리더라도 맞게 가자",
     "천리길도 한 걸음부터",
     "늦었을 때가 진짜 늦었으니까 지금부터라도 하자",
@@ -72,13 +83,61 @@ if st.button("🎯 동기부여 듣기"):
 if st.session_state.motivation:
     st.success(f"🌟 {st.session_state.motivation}")
 
-# ------------------- 4. 집중/휴식 시간 기록 -------------------
+# ------------------- 4. 집중 타이머 -------------------
 st.markdown("---")
-st.header("🧠 집중 / ☕ 휴식 시간 기록")
+st.header("⏱ 25분 집중 타이머")
+
+update_timer("focus")
+fmin, fsec = divmod(st.session_state.focus_remaining, 60)
+st.subheader(f"🕒 남은 집중 시간: {fmin:02d}:{fsec:02d}")
+
+focus_col1, focus_col2, focus_col3 = st.columns(3)
+with focus_col1:
+    if st.button("▶️ 시작", key="focus_start"):
+        st.session_state.focus_running = True
+        st.session_state.focus_last_update = time.time()
+with focus_col2:
+    if st.button("⏸️ 일시정지", key="focus_pause"):
+        st.session_state.focus_running = False
+with focus_col3:
+    if st.button("🔁 초기화", key="focus_reset"):
+        st.session_state.focus_running = False
+        st.session_state.focus_remaining = 25 * 60
+
+if st.session_state.focus_remaining == 0:
+    st.success("🎉 집중 시간 종료! 휴식 시간으로 넘어가세요.")
+
+# ------------------- 5. 휴식 타이머 -------------------
+st.markdown("---")
+st.header("🛌 5분 휴식 타이머")
+
+update_timer("break")
+bmin, bsec = divmod(st.session_state.break_remaining, 60)
+st.subheader(f"🕒 남은 휴식 시간: {bmin:02d}:{bsec:02d}")
+
+break_col1, break_col2, break_col3 = st.columns(3)
+with break_col1:
+    if st.button("▶️ 시작", key="break_start"):
+        st.session_state.break_running = True
+        st.session_state.break_last_update = time.time()
+with break_col2:
+    if st.button("⏸️ 일시정지", key="break_pause"):
+        st.session_state.break_running = False
+with break_col3:
+    if st.button("🔁 초기화", key="break_reset"):
+        st.session_state.break_running = False
+        st.session_state.break_remaining = 5 * 60
+
+if st.session_state.break_remaining == 0:
+    st.info("☕ 휴식 종료! 다시 집중해볼까요?")
+
+# ------------------- 6. 집중/휴식 시간 수동 기록 -------------------
+st.markdown("---")
+st.header("🧠 수동 집중 / ☕ 휴식 시간 기록")
 
 with st.form("time_log_form"):
-    focus = st.number_input("오늘 추가한 집중 시간 (분)", min_value=0, step=1)
-    rest = st.number_input("오늘 추가한 휴식 시간 (분)", min_value=0, step=1)
+    focus = st.number_input("추가할 집중 시간 (분)", min_value=0, step=1)
+    rest = st.number_input("추가할 휴식 시간 (분)", min_value=0, step=1)
     submitted = st.form_submit_button("기록하기")
 
     if submitted:
@@ -86,9 +145,9 @@ with st.form("time_log_form"):
             st.session_state.focus_log.append(focus)
         if rest > 0:
             st.session_state.break_log.append(rest)
-        st.success("⏱ 시간이 기록되었습니다!")
+        st.success("✅ 시간이 기록되었습니다!")
 
-# ------------------- 5. 오늘의 일기 -------------------
+# ------------------- 7. 오늘의 일기 -------------------
 st.markdown("---")
 st.header("📓 오늘의 일기")
 
@@ -103,7 +162,7 @@ if today in st.session_state.diary:
     st.markdown("📖 **오늘 쓴 일기 미리 보기:**")
     st.info(st.session_state.diary[today])
 
-# ------------------- 통계 -------------------
+# ------------------- 8. 통계 -------------------
 st.markdown("---")
 st.header("📊 집중/휴식 누적 통계")
 
