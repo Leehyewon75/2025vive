@@ -128,18 +128,22 @@ if st.session_state.break_remaining == 0:
 st.markdown("---")
 st.header("✅ 오늘의 할 일")
 
+# 입력 상태 값 따로 관리 (rerun 없이도 동작)
+if "new_task_input_val" not in st.session_state:
+    st.session_state.new_task_input_val = ""
+
 # 할 일 입력창
-new_task = st.text_input("할 일을 입력하세요", key="new_task_input")
+new_task = st.text_input("할 일을 입력하세요", value=st.session_state.new_task_input_val)
 
 # 추가 버튼
 if st.button("추가"):
-    if new_task.strip():  # 빈 문자열 입력 방지
+    if new_task.strip():
         if "checklist" not in st.session_state:
             st.session_state.checklist = []
         st.session_state.checklist.append({"text": new_task.strip(), "checked": False})
-        st.experimental_rerun()  # 입력창 초기화 & UI 갱신
+        st.session_state.new_task_input_val = ""  # 입력창 초기화 값 리셋
 
-# 체크박스 리스트 표시
+# 체크박스 리스트
 if "checklist" not in st.session_state:
     st.session_state.checklist = []
 
@@ -147,7 +151,6 @@ for i, item in enumerate(st.session_state.checklist):
     task_key = f"task_{i}_{item['text']}"
     checked = st.checkbox(item["text"], value=item["checked"], key=task_key)
     st.session_state.checklist[i]["checked"] = checked
-
 # ---------------- 일기 ----------------
 st.markdown("---")
 st.header("📓 오늘의 일기")
