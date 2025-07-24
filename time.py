@@ -112,7 +112,7 @@ else:
 
 # 선택된 보상이 있을 경우 표시
 if st.session_state.selected_reward:
-    st.success(f"🎉 오늘 보상은 바로 **{st.session_state.selected_reward}**! 🎉")
+    st.success(f"🎉 오늘 보상은 **{st.session_state.selected_reward}**! 🎉")
 
 # ----------------------------
 # ✅ 25분 집중 타이머 (포모도로)
@@ -153,7 +153,7 @@ if st.session_state.running:
         st.rerun() # 페이지 새로고침
 
 else:
-    st.write("버튼을 눌러 집중 타이머를 시작할 수 있습니다 ✨")
+    st.write("버튼을 눌러 집중 타이머를 시작할 수 있습니다")
 
 # ----------------------------
 # ✅ 일기 기능
@@ -184,4 +184,4 @@ if st.session_state.diary_entries:
     saved_diary_content = st.session_state.diary_entries.get(selected_date, "")
     st.text_area(f"📖 {selected_date}의 일기", value=saved_diary_content, height=200, disabled=True, key="view_diary_textarea")
 else:
-    st.info("아직 작성된 일기가 없습니다 오늘 하루를 기록해보는 건 어떤가요? ✍️")
+    st.info("아직 작성된 일기가 없습니다 오늘 하루를 기록해보는 건 어떨가요? ✍️")
