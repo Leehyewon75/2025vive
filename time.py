@@ -32,7 +32,7 @@ init_session_state()
 # ----------------------------
 # ✅ 체크리스트
 # ----------------------------
-st.title("✅ study")
+st.title("✅study")
 st.header("📋오늘의 할 일")
 
 # 할 일 입력 필드를 st.form 안에 넣어서 제출 시 자동으로 초기화되게 변경
@@ -66,12 +66,12 @@ if total > 0:
     st.markdown(f"**완료: {completed} / {total}**")
     st.progress(completed / total) # 완료 진행률 막대
 else:
-    st.info("할 일을 입력해서 미루기 방지를 시작해보세요! 💪")
+    st.info("할 일을 입력해서 미루기 방지를 시작해보세요!💪")
 
 # ----------------------------
 # ✅ 보상 등록 + 랜덤 뽑기
 # ----------------------------
-st.header("🎁 보상")
+st.header("🎁보상")
 
 with st.form("reward_form_section"):
     category = st.text_input("카테고리 입력", placeholder="예: 맛있는 간식, 힐링 타임", key="reward_category_input")
@@ -80,45 +80,45 @@ with st.form("reward_form_section"):
     if submit_reward and category.strip() and reward.strip():
         # 딕셔너리에 카테고리가 없으면 새로 만들고 보상 추가
         st.session_state.reward_categories.setdefault(category, []).append(reward)
-        st.success("새로운 보상이 등록되었습니다! 🥰")
+        st.success("새로운 보상이 등록되었습니다!🥰")
 
 # 등록된 보상 출력
 if st.session_state.reward_categories:
-    st.subheader("💡 내가 등록한 보상 목록")
+    st.subheader("💡내가 등록한 보상 목록")
     for cat, rewards in st.session_state.reward_categories.items():
-        st.markdown(f"**⭐ {cat}**")
+        st.markdown(f"**⭐{cat}**")
         for r in rewards:
             st.write(f"• {r}")
 else:
-    st.info("열심히 일한 당신, 보상도 등록하고 계획해 볼까요? 🥳")
+    st.info("열심히 일한 당신, 보상도 등록하고 계획해 볼까요?🥳")
 
 # 보상 뽑기
-st.header("🏆 보상 뽑기")
+st.header("🏆보상 뽑기")
 # 모든 체크리스트 완료 시에만 보상 뽑기 가능
 if completed == total and total > 0:
     cat_list = list(st.session_state.reward_categories.keys())
     if cat_list: # 등록된 카테고리가 있을 경우
         selected_cat = st.selectbox("어떤 카테고리에서 뽑아볼까?", cat_list)
-        if st.button("🎲 보상 뽑기"):
+        if st.button("🎲보상 뽑기"):
             pool = st.session_state.reward_categories[selected_cat]
             if pool:
                 st.session_state.selected_reward = random.choice(pool) # 랜덤으로 보상 선택
             else:
                 st.warning(f"'{selected_cat}' 카테고리에는 아직 보상이 없어요! 추가해주세요")
     else:
-        st.info("보상을 뽑으려면 먼저 '카테고리별 보상 등록'에서 보상을 등록해줘야 합니다! 😥")
+        st.info("보상을 뽑으려면 먼저 '카테고리별 보상 등록'에서 보상을 등록해줘야 합니다!😥")
 else:
     st.info("아직 할 일이 남아있어요! 모든 체크리스트를 완료하면 보상을 뽑을 수 있습니다.")
 
 # 선택된 보상이 있을 경우 표시
 if st.session_state.selected_reward:
-    st.success(f"🎉 오늘 보상은 **{st.session_state.selected_reward}**! 🎉")
+    st.success(f"🎉오늘의 보상은 **{st.session_state.selected_reward}**!🎉")
 
 # ----------------------------
 # ✅ 25분 집중 타이머 (포모도로)
 # ----------------------------
-st.header("⏱ 25분 집중 타이머")
-st.markdown("규칙적인 휴식으로 집중력을 높여보세요 🔥")
+st.header("⏱25분 집중 타이머")
+st.markdown("규칙적인 휴식으로 집중력을 높여보세요🔥")
 
 # 타이머 시작 버튼
 if st.button("▶️ 타이머 시작", key="start_timer_btn"):
@@ -141,7 +141,7 @@ if st.session_state.running:
     remaining = total_seconds - elapsed # 남은 시간 계산
 
     if remaining <= 0:
-        st.success("⏰ 25분 집중 시간 완료! 🥳")
+        st.success("⏰25분 집중 완료!🥳")
         st.session_state.running = False # 타이머 중단
         st.session_state.start_time = None # 시작 시간 초기화
     else:
@@ -158,30 +158,30 @@ else:
 # ----------------------------
 # ✅ 일기 기능
 # ----------------------------
-st.header("📝 일기")
+st.header("📝일기")
 
 # 오늘 날짜를 YYYY-MM-DD 형식으로 가져오기
 today = datetime.date.today().isoformat()
 # 해당 날짜에 저장된 일기가 있으면 불러오고, 없으면 빈 문자열
 default_text = st.session_state.diary_entries.get(today, "")
 # 일기 입력 필드
-diary_input = st.text_area("오늘 하루 어땠나요? 마음껏 적어보세요 💖", value=default_text, height=200, key="diary_textarea")
+diary_input = st.text_area("오늘 하루 어땠나요? 마음껏 적어보세요💖", value=default_text, height=200, key="diary_textarea")
 
 if st.button("💾 일기 저장", key="save_diary_btn"):
     if isinstance(st.session_state.diary_entries, dict): # diary_entries가 딕셔너리인지 다시 확인 (안전성)
         st.session_state.diary_entries[today] = diary_input # 현재 날짜로 일기 저장
         st.success("일기가 저장되었습니다")
     else:
-        st.error("❗️이런! 일기 저장에 문제가 생겼습니다. 다시 시도해 주세요 😥")
+        st.error("❗️이런! 일기 저장에 문제가 생겼습니다. 다시 시도해 주세요😥")
 
 # 이전 일기 보기
 if st.session_state.diary_entries:
-    st.subheader("📚 지나간 내 일기 다시 보기")
+    st.subheader("📚지나간 내 일기 다시 보기")
     # 저장된 일기 날짜들을 최신순으로 정렬
     dates = sorted(st.session_state.diary_entries.keys(), reverse=True)
     selected_date = st.selectbox("궁금한 날짜를 선택해보세요!", dates)
     # 선택된 날짜의 일기 내용 불러오기
     saved_diary_content = st.session_state.diary_entries.get(selected_date, "")
-    st.text_area(f"📖 {selected_date}의 일기", value=saved_diary_content, height=200, disabled=True, key="view_diary_textarea")
+    st.text_area(f"📖{selected_date}의 일기", value=saved_diary_content, height=200, disabled=True, key="view_diary_textarea")
 else:
-    st.info("아직 작성된 일기가 없습니다 오늘 하루를 기록해보는 건 어떨가요? ✍️")
+    st.info("아직 작성된 일기가 없습니다 오늘 하루를 기록해보는 건 어떨가요?✍️")
