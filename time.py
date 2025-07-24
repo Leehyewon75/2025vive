@@ -170,9 +170,9 @@ diary_input = st.text_area("오늘 하루 어땠나요? 마음껏 적어보세�
 if st.button("💾 일기 저장", key="save_diary_btn"):
     if isinstance(st.session_state.diary_entries, dict): # diary_entries가 딕셔너리인지 다시 확인 (안전성)
         st.session_state.diary_entries[today] = diary_input # 현재 날짜로 일기 저장
-        st.success("일기가 저장되었습니다!")
+        st.success("일기가 저장되었습니다")
     else:
-        st.error("❗️이런! 일기 저장에 문제가 생겼어요. 다시 시도해 주세요 😥")
+        st.error("❗️이런! 일기 저장에 문제가 생겼습니다. 다시 시도해 주세요 😥")
 
 # 이전 일기 보기
 if st.session_state.diary_entries:
