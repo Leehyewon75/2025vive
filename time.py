@@ -66,7 +66,7 @@ if total > 0:
     st.markdown(f"**완료: {completed} / {total}**")
     st.progress(completed / total) # 완료 진행률 막대
 else:
-    st.info("할 일을 입력해서 미루기 방지 시작해보세요! 💪")
+    st.info("할 일을 입력해서 미루기 방지를 시작해보세요! 💪")
 
 # ----------------------------
 # ✅ 보상 등록 + 랜덤 뽑기
@@ -108,7 +108,7 @@ if completed == total and total > 0:
     else:
         st.info("보상을 뽑으려면 먼저 '카테고리별 보상 등록'에서 보상을 등록해줘야 합니다! 😥")
 else:
-    st.info("아직 할 일이 남아있어요! 모든 체크리스트를 완료하면 보상을 뽑을 수 있습니다. ✨")
+    st.info("아직 할 일이 남아있어요! 모든 체크리스트를 완료하면 보상을 뽑을 수 있습니다.")
 
 # 선택된 보상이 있을 경우 표시
 if st.session_state.selected_reward:
@@ -165,7 +165,7 @@ today = datetime.date.today().isoformat()
 # 해당 날짜에 저장된 일기가 있으면 불러오고, 없으면 빈 문자열
 default_text = st.session_state.diary_entries.get(today, "")
 # 일기 입력 필드
-diary_input = st.text_area("오늘 하루 어땠나요? 마음껏 적어보세요! 💖", value=default_text, height=200, key="diary_textarea")
+diary_input = st.text_area("오늘 하루 어땠나요? 마음껏 적어보세요 💖", value=default_text, height=200, key="diary_textarea")
 
 if st.button("💾 일기 저장", key="save_diary_btn"):
     if isinstance(st.session_state.diary_entries, dict): # diary_entries가 딕셔너리인지 다시 확인 (안전성)
