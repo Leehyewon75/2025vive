@@ -146,7 +146,7 @@ if st.session_state.running:
         st.session_state.start_time = None # 시작 시간 초기화
     else:
         mins, secs = divmod(remaining, 60) # 남은 시간을 분과 초로 변환
-        st.subheader(f"남은 시간: **{mins:02d}:{secs:02d}** 틱톡 ⏰")
+        st.subheader(f"남은 시간: **{mins:02d}:{secs:02d}**⏰")
         st.progress((total_seconds - remaining) / total_seconds) # 진행률 막대 업데이트
         # 타이머가 계속 틱톡 거리도록 페이지를 계속 새로고침
         time.sleep(1) # 1초 대기 (CPU 부하 줄임)
