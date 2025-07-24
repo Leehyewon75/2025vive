@@ -176,7 +176,7 @@ if st.button("💾 일기 저장", key="save_diary_btn"):
 
 # 이전 일기 보기
 if st.session_state.diary_entries:
-    st.subheader("📚지나간 내 일기 다시 보기")
+    st.subheader("📚내 일기 다시 보기")
     # 저장된 일기 날짜들을 최신순으로 정렬
     dates = sorted(st.session_state.diary_entries.keys(), reverse=True)
     selected_date = st.selectbox("궁금한 날짜를 선택해보세요!", dates)
