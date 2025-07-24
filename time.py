@@ -43,7 +43,7 @@ with st.form("task_input_form", clear_on_submit=True): # clear_on_submit=True �
     if add_button: # 폼 제출 버튼 클릭 시
         if task_input.strip(): # 빈 문자열이 아닐 경우에만 추가
             st.session_state.checklist.append({"text": task_input.strip(), "checked": False})
-            st.success("할 일이 추가되었습니다 ✨")
+            st.success("할 일이 추가되었습니다")
         else:
             st.warning("할 일을 입력해주세요") # 입력 내용이 없으면 경고 메시지
 
