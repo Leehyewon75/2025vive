@@ -43,7 +43,7 @@ with st.form("task_input_form", clear_on_submit=True): # clear_on_submit=True �
     if add_button: # 폼 제출 버튼 클릭 시
         if task_input.strip(): # 빈 문자열이 아닐 경우에만 추가
             st.session_state.checklist.append({"text": task_input.strip(), "checked": False})
-            st.success("할 일이 추가되었습니다! ✨")
+            st.success("할 일이 추가되었습니다 ✨")
         else:
             st.warning("할 일을 입력해주세요") # 입력 내용이 없으면 경고 메시지
 
@@ -86,7 +86,7 @@ with st.form("reward_form_section"):
 if st.session_state.reward_categories:
     st.subheader("💡 내가 등록한 보상 목록")
     for cat, rewards in st.session_state.reward_categories.items():
-        st.markdown(f"**🗂️ {cat}**")
+        st.markdown(f"**⭐ {cat}**")
         for r in rewards:
             st.write(f"• {r}")
 else:
@@ -99,7 +99,7 @@ if completed == total and total > 0:
     cat_list = list(st.session_state.reward_categories.keys())
     if cat_list: # 등록된 카테고리가 있을 경우
         selected_cat = st.selectbox("어떤 카테고리에서 뽑아볼까?", cat_list)
-        if st.button("🎲 보상 뽑기!"):
+        if st.button("🎲 보상 뽑기"):
             pool = st.session_state.reward_categories[selected_cat]
             if pool:
                 st.session_state.selected_reward = random.choice(pool) # 랜덤으로 보상 선택
@@ -112,13 +112,13 @@ else:
 
 # 선택된 보상이 있을 경우 표시
 if st.session_state.selected_reward:
-    st.success(f"🎉 오늘 보상은 바로! **{st.session_state.selected_reward}**! 축하해! 🎉")
+    st.success(f"🎉 오늘 보상은 바로 **{st.session_state.selected_reward}**! 🎉")
 
 # ----------------------------
 # ✅ 25분 집중 타이머 (포모도로)
 # ----------------------------
 st.header("⏱ 25분 집중 타이머")
-st.markdown("규칙적인 휴식으로 집중력을 쑥쑥 높여보세요! 🍅")
+st.markdown("규칙적인 휴식으로 집중력을 높여보세요 🔥")
 
 # 타이머 시작 버튼
 if st.button("▶️ 타이머 시작", key="start_timer_btn"):
@@ -141,7 +141,7 @@ if st.session_state.running:
     remaining = total_seconds - elapsed # 남은 시간 계산
 
     if remaining <= 0:
-        st.success("⏰ 25분 집중 시간 완료! 수고했어요! 🥳")
+        st.success("⏰ 25분 집중 시간 완료! 🥳")
         st.session_state.running = False # 타이머 중단
         st.session_state.start_time = None # 시작 시간 초기화
     else:
